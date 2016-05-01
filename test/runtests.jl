@@ -1,5 +1,4 @@
 using Niancat
-using Base.Test
+using FactCheck
 
-# write your own tests here
-@test 1 == 1
+include("logic_test.jl")

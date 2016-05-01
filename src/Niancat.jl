@@ -1,5 +1,5 @@
 module Niancat
 
-# package code goes here
+include("logic.jl")
 
 end # module
