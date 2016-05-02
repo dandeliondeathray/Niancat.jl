@@ -1,3 +1,11 @@
+import Base.==
+
+import Niancat: Puzzle, Word, AbstractCommand, GetPuzzleCommand,
+                AbstractResponse, GetPuzzleResponse, NoPuzzleSetResponse
+
+#
+# Test data
+#
 
 hash_tests = [
     ("GALLTJUTA", "f00ale",   "f72e9a9523bbc72bf7366a58a04046408d2d88ea811afdc9a459d24e077fa71d"),
@@ -13,10 +21,56 @@ hash_tests = [
     ("ÅÄÖABCDEF", "andrnils", "8027afb1b362daa27be64edf1806d50a344082d3a534cfc38c827a7e71bc8779")
 ]
 
+user_id0    = UserId("U0")
+user_id1    = UserId("U1")
+channel_id0 = ChannelId("C0")
+puzzle0     = Puzzle("ABCDEFGHI")
+puzzle1     = Puzzle("GHIJKLMNO")
+
+#
+# Equality
+#
+
+function ==(a::AbstractResponse, b::AbstractResponse)
+    if typeof(a) != typeof(b)
+        return false
+    end
+
+    for field_name in fieldnames(a)
+        if getfield(a, field_name) != getfield(b, field_name)
+            return false
+        end
+    end
+
+    true
+end
+
+#
+# Tests
+#
+
 facts("Niancat logic") do
+    context("Test response equality") do
+        @fact GetPuzzleResponse(user_id0, puzzle0) --> GetPuzzleResponse(user_id0, puzzle0)
+        @fact GetPuzzleResponse(user_id0, puzzle0) --> not(GetPuzzleResponse(user_id0, puzzle1))
+        @fact GetPuzzleResponse(user_id0, puzzle0) --> not(GetPuzzleResponse(user_id1, puzzle0))
+    end
+
     context("Solution hash") do
         for (word, nick, expected) in hash_tests
             @fact Niancat.solution_hash(utf8(word), utf8(nick)) --> expected
         end
+    end
+
+    context("Get puzzle") do
+        command = GetPuzzleCommand(user_id0)
+        logic = Logic(Nullable{Puzzle}(puzzle0))
+        @fact handle(logic, command) --> GetPuzzleResponse(user_id0, puzzle0)
+    end
+
+    context("Get puzzle when not set") do
+        command = GetPuzzleCommand(user_id0)
+        logic = Logic(Nullable{Puzzle}())
+        @fact handle(logic, command) --> NoPuzzleSetResponse(user_id0)
     end
 end

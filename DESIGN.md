@@ -39,8 +39,9 @@ The logic of the bot is handled here. The `Logic` type has a single function
 - `CorrectSolutionResponse`
 - `IncorrectSolutionResponse`
 - `SolutionNotificationResponse`
-- `TodaysPuzzleResponse`
-- `SetTodaysPuzzleResponse`
+- `GetPuzzleResponse`
+- `NoPuzzleSetResponse`
+- `SetPuzzleResponse`
 - `HelpResponse`
 - `InvalidCommandResponse`
 - `CompositeResponse`
@@ -93,16 +94,36 @@ from user id to user name. We'll create a separate type for that, just as with t
 
 Word dictionary
 ---------------
-The word dictionary keeps a list of all valid words for the puzzle. It has two function
+The word dictionary keeps a list of all valid words for the puzzle. It has two functions
 
 `is_solution(::AbstractWordDictionary, word::UTF8String)`
 
-:    Returns true if a given word is a solution, false otherwise.
+Returns true if a given word is a solution, false otherwise.
 
 `no_of_solutions(::AbstractWordDictionary, puzzle::UTF8String)`
 
-:    Finds the number of solutions for a given puzzle.
+Finds the number of solutions for a given puzzle.
 
 Member scroll
 -------------
-This keeps track of user, and allows the responder to map from user id to name.
+This keeps track of users, and allows the responder to map from user id to name.
+
+Auxiliary types
+---------------
+Note that the puzzle and attempted solutions are conceptually different things, even though they're
+presented to the user as text. Therefore they will be separate types. The `@newtype` and
+`@newimmutable` macros in DandelionSlack can used to easily create new types.
+
+Private communication
+---------------------
+The bot will only check solutions for words written in private communication with it. It will not
+check solutions for text written in channels. All commands will however be handled from channels or
+users. Also, the responses for commands will be sent in the same place where the commands was
+received. A command in a channel will have a response in the channel and a command in an IM will
+lead to a response in the same IM context.
+
+`CheckSolutionCommand` will only have a field for a user id. It shall never be listened to in a
+channel. However, `GetPuzzleCommand`, will be either a user id or a channel, and the logic doesn't
+really care which. It will simply respond in the same way. For this it uses a union type of user
+id and channel id. The responder type will internally have two different functions for creating
+the message event.
