@@ -6,7 +6,7 @@ export Puzzle, Word, ChannelOrUser,
        CheckSolutionCommand, GetPuzzleCommand, SetPuzzleCommand,
        IncorrectSolutionResponse, CorrectSolutionResponse, SolutionNotificationResponse,
        GetPuzzleResponse, NoPuzzleSetResponse, SetPuzzleResponse, InvalidPuzzleResponse,
-       CompositeResponse
+       CompositeResponse, UnknownUserSolutionResponse, IgnoredEventCommand, IgnoredEventResponse
 
 #
 # Helper types
@@ -40,6 +40,11 @@ immutable SetPuzzleCommand <: AbstractCommand
     puzzle::Puzzle
 end
 
+immutable IgnoredEventCommand <: AbstractCommand
+    from::ChannelOrUser
+    text::UTF8String
+end
+
 #
 # Responses
 #
@@ -61,6 +66,10 @@ immutable SolutionNotificationResponse <: AbstractResponse
     hash::UTF8String
 end
 
+immutable UnknownUserSolutionResponse <: AbstractResponse
+    user::UserId
+end
+
 immutable GetPuzzleResponse <: AbstractResponse
     from::ChannelOrUser
     puzzle::Puzzle
@@ -80,6 +89,11 @@ end
 immutable InvalidPuzzleResponse <: AbstractResponse
     from::ChannelOrUser
     puzzle::Puzzle
+end
+
+immutable IgnoredEventResponse <: AbstractResponse
+    from::ChannelOrUser
+    text::UTF8String
 end
 
 immutable CompositeResponse <: AbstractResponse

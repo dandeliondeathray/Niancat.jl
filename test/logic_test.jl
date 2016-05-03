@@ -153,10 +153,33 @@ facts("Niancat logic") do
     end
 
     context("Incorrect solution") do
-        @pending false --> true
+        member_scroll = FakeMemberScroll()
+        words = FakeWordDictionary(false, 1)
+        logic = Logic(words, member_scroll)
+        word = Word("GALLTJUTA")
+        command = CheckSolutionCommand(user_id0, word)
+        @fact handle(logic, command) --> IncorrectSolutionResponse(user_id0, word)
     end
 
     context("Unknown user") do
-        @pending false --> true
+        member_scroll = FakeMemberScroll()
+        words = FakeWordDictionary(true, 1)
+        logic = Logic(words, member_scroll)
+        word = Word("GALLTJUTA")
+        command = CheckSolutionCommand(user_id0, word)
+        response = handle(logic, command)
+        @fact isa(response, CompositeResponse) --> true
+        correct_response, unknown_response = response
+        @fact correct_response --> CorrectSolutionResponse(user_id0, word)
+        @fact unknown_response --> UnknownUserSolutionResponse(user_id0)
+    end
+
+    context("Ignored event") do
+        member_scroll = FakeMemberScroll()
+        words = FakeWordDictionary(true, 1)
+        logic = Logic(words, member_scroll)
+        text = utf8("some text")
+        command = IgnoredEventCommand(user_id0, text)
+        @fact handle(logic, command) --> IgnoredEventResponse(user_id0, text)
     end
 end

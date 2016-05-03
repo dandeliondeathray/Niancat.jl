@@ -43,7 +43,13 @@ end
 
 function handle(logic::Logic, command::CheckSolutionCommand)
     if is_solution(logic.words, command.word)
-        name = get(find_name(logic.members, command.user))
+        maybe_name = find_name(logic.members, command.user)
+        if isnull(maybe_name)
+            return CompositeResponse(
+                CorrectSolutionResponse(command.user, command.word),
+                UnknownUserSolutionResponse(command.user))
+        end
+        name = get(maybe_name)
         hash = solution_hash(utf8(command.word), name)
         return CompositeResponse(
             CorrectSolutionResponse(command.user, command.word),
@@ -52,3 +58,5 @@ function handle(logic::Logic, command::CheckSolutionCommand)
         return IncorrectSolutionResponse(command.user, command.word)
     end
 end
+
+handle(::Logic, command::IgnoredEventCommand) = IgnoredEventResponse(command.from, command.text)
