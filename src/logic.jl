@@ -12,11 +12,13 @@ abstract AbstractLogic
 type Logic
     puzzle::Nullable{Puzzle}
     words::AbstractWordDictionary
+    members::AbstractMemberScroll
     solutions::UInt
 
-    Logic(words::AbstractWordDictionary) = new(Nullable{Puzzle}(), words, 0)
-    Logic(p::Nullable{Puzzle}, words::AbstractWordDictionary, s::Int) =
-        new(Nullable{Puzzle}(p), words, s)
+    Logic(words::AbstractWordDictionary, m::AbstractMemberScroll) =
+        new(Nullable{Puzzle}(), words, m, 0)
+    Logic(p::Nullable{Puzzle}, words::AbstractWordDictionary, m::AbstractMemberScroll, s::Int) =
+        new(Nullable{Puzzle}(p), words, m, s)
 end
 
 function handle(logic::Logic, command::GetPuzzleCommand)
@@ -37,4 +39,16 @@ function handle(logic::Logic, command::SetPuzzleCommand)
 
     logic.puzzle = command.puzzle
     SetPuzzleResponse(command.from, command.puzzle, logic.solutions)
+end
+
+function handle(logic::Logic, command::CheckSolutionCommand)
+    if is_solution(logic.words, command.word)
+        name = get(find_name(logic.members, command.user))
+        hash = solution_hash(utf8(command.word), name)
+        return CompositeResponse(
+            CorrectSolutionResponse(command.user, command.word),
+            SolutionNotificationResponse(command.user, hash))
+    else
+        return IncorrectSolutionResponse(command.user, command.word)
+    end
 end

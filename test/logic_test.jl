@@ -1,10 +1,6 @@
 import Base.==
 
-import Niancat: Puzzle, Word, AbstractCommand, GetPuzzleCommand,
-                AbstractResponse, GetPuzzleResponse, NoPuzzleSetResponse,
-                AbstractWordDictionary,
-                SetPuzzleCommand, SetPuzzleResponse, InvalidPuzzleResponse,
-                no_of_solutions, is_solution
+import Niancat: find_name, is_solution, no_of_solutions, handle
 
 #
 # Test data
@@ -52,17 +48,18 @@ end
 # Mocks
 #
 
-immutable FakeMemberScroll
+immutable FakeMemberScroll <: AbstractMemberScroll
     user::Nullable{UTF8String}
     channel::Nullable{UTF8String}
 
     FakeMemberScroll() = new(Nullable(), Nullable())
-    FakeMemberScroll(u::UserId) = new(Nullable(u), Nullable())
-    FakeMemberScroll(c::ChannelId) = new(Nullable(), Nullable(c))
+    FakeMemberScroll(u::UTF8String) = new(Nullable(u), Nullable())
 end
 
-find_name(s::FakeMemberScroll, ::UserId) = f.user
-find_name(s::FakeMemberScroll, ::ChannelId) = f.channel
+find_name(s::FakeMemberScroll, ::UserId) = s.user
+find_name(s::FakeMemberScroll, ::ChannelId) = s.channel
+
+fake_members = FakeMemberScroll()
 
 immutable FakeWordDictionary <: AbstractWordDictionary
     is_solution_::Bool
@@ -94,20 +91,20 @@ facts("Niancat logic") do
     context("Get puzzle") do
         words = FakeWordDictionary(true, 1)
         command = GetPuzzleCommand(user_id0)
-        logic = Logic(Nullable{Puzzle}(puzzle0), words, 1)
+        logic = Logic(Nullable{Puzzle}(puzzle0), words, fake_members, 1)
         @fact handle(logic, command) --> GetPuzzleResponse(user_id0, puzzle0, 1)
     end
 
     context("Get puzzle when not set") do
         words = FakeWordDictionary(true, 1)
         command = GetPuzzleCommand(user_id0)
-        logic = Logic(words)
+        logic = Logic(words, fake_members)
         @fact handle(logic, command) --> NoPuzzleSetResponse(user_id0)
     end
 
     context("Set puzzle") do
         words = FakeWordDictionary(true, 1)
-        logic = Logic(words)
+        logic = Logic(words, fake_members)
         get_command = GetPuzzleCommand(user_id0)
         set_command = SetPuzzleCommand(user_id0, Puzzle("ABCDEFGHI"))
 
@@ -119,7 +116,7 @@ facts("Niancat logic") do
 
     context("Set invalid puzzle") do
         words = FakeWordDictionary(true, 0)
-        logic = Logic(Nullable{Puzzle}(puzzle1), words, 1)
+        logic = Logic(Nullable{Puzzle}(puzzle1), words, fake_members, 1)
         get_command = GetPuzzleCommand(user_id0)
         set_command = SetPuzzleCommand(user_id0, puzzle0)
         @fact handle(logic, set_command) --> InvalidPuzzleResponse(user_id0, puzzle0)
@@ -129,11 +126,37 @@ facts("Niancat logic") do
     context("Set puzzle, multiple solutions") do
         solutions = 17
         words = FakeWordDictionary(true, solutions)
-        logic = Logic(words)
+        logic = Logic(words, fake_members)
         get_command = GetPuzzleCommand(user_id0)
         set_command = SetPuzzleCommand(user_id0, Puzzle("ABCDEFGHI"))
 
         @fact handle(logic, set_command) --> SetPuzzleResponse(user_id0, puzzle0, solutions)
         @fact handle(logic, get_command) --> GetPuzzleResponse(user_id0, puzzle0, solutions)
+    end
+
+    context("Solve the puzzle") do
+        name = utf8("erike")
+        member_scroll = FakeMemberScroll(name)
+        words = FakeWordDictionary(true, 1)
+        word = Word("GALLTJUTA")
+        logic = Logic(words, member_scroll)
+        expected_hash = utf8("d8e7363cdad6303dd4c41cb2ad3e2c35759257ca8ac509107e4e9e9ff5741933")
+        command = CheckSolutionCommand(user_id0, word)
+
+        response = handle(logic, command)
+        @fact isa(response, CompositeResponse) --> true
+
+        solution_response, notification_response = response
+
+        @fact solution_response --> CorrectSolutionResponse(user_id0, word)
+        @fact notification_response --> SolutionNotificationResponse(user_id0, expected_hash)
+    end
+
+    context("Incorrect solution") do
+        @pending false --> true
+    end
+
+    context("Unknown user") do
+        @pending false --> true
     end
 end

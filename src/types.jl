@@ -1,4 +1,12 @@
 import DandelionSlack: @newtype, @newimmutable, @stringinterface
+import Base: start, done, endof, next
+
+export Puzzle, Word, ChannelOrUser,
+       AbstractCommand, AbstractResponse,
+       CheckSolutionCommand, GetPuzzleCommand, SetPuzzleCommand,
+       IncorrectSolutionResponse, CorrectSolutionResponse, SolutionNotificationResponse,
+       GetPuzzleResponse, NoPuzzleSetResponse, SetPuzzleResponse, InvalidPuzzleResponse,
+       CompositeResponse
 
 #
 # Helper types
@@ -75,6 +83,12 @@ immutable InvalidPuzzleResponse <: AbstractResponse
 end
 
 immutable CompositeResponse <: AbstractResponse
+    responses::Vector{AbstractResponse}
 
+    CompositeResponse(v...) = new([v...])
 end
 
+endof(c::CompositeResponse) = endof(c.responses)
+next(c::CompositeResponse, i::Int) = next(c.responses, i)
+start(c::CompositeResponse) = start(c.responses)
+done(c::CompositeResponse, i::Int) = done(c.responses, i)

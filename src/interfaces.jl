@@ -1,3 +1,6 @@
+export AbstractMemberScroll, AbstractWordDictionary, AbstractLogic,
+       find_name, is_solution, no_of_solutions, handle
+
 abstract AbstractMemberScroll
 
 find_name(t::AbstractMemberScroll, ::UserId) =
