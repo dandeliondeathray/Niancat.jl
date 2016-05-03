@@ -1,7 +1,10 @@
 import Base.==
 
 import Niancat: Puzzle, Word, AbstractCommand, GetPuzzleCommand,
-                AbstractResponse, GetPuzzleResponse, NoPuzzleSetResponse
+                AbstractResponse, GetPuzzleResponse, NoPuzzleSetResponse,
+                AbstractWordDictionary,
+                SetPuzzleCommand, SetPuzzleResponse, InvalidPuzzleResponse,
+                no_of_solutions, is_solution
 
 #
 # Test data
@@ -46,14 +49,40 @@ function ==(a::AbstractResponse, b::AbstractResponse)
 end
 
 #
+# Mocks
+#
+
+immutable FakeMemberScroll
+    user::Nullable{UTF8String}
+    channel::Nullable{UTF8String}
+
+    FakeMemberScroll() = new(Nullable(), Nullable())
+    FakeMemberScroll(u::UserId) = new(Nullable(u), Nullable())
+    FakeMemberScroll(c::ChannelId) = new(Nullable(), Nullable(c))
+end
+
+find_name(s::FakeMemberScroll, ::UserId) = f.user
+find_name(s::FakeMemberScroll, ::ChannelId) = f.channel
+
+immutable FakeWordDictionary <: AbstractWordDictionary
+    is_solution_::Bool
+    no_of_solutions_::Int
+end
+
+is_solution(f::FakeWordDictionary, w::Word) = f.is_solution_
+no_of_solutions(f::FakeWordDictionary, w::Puzzle) = f.no_of_solutions_
+
+#
 # Tests
 #
 
 facts("Niancat logic") do
     context("Test response equality") do
-        @fact GetPuzzleResponse(user_id0, puzzle0) --> GetPuzzleResponse(user_id0, puzzle0)
-        @fact GetPuzzleResponse(user_id0, puzzle0) --> not(GetPuzzleResponse(user_id0, puzzle1))
-        @fact GetPuzzleResponse(user_id0, puzzle0) --> not(GetPuzzleResponse(user_id1, puzzle0))
+        @fact GetPuzzleResponse(user_id0, puzzle0, 1) --> GetPuzzleResponse(user_id0, puzzle0, 1)
+        @fact GetPuzzleResponse(user_id0, puzzle0, 1) -->
+            not(GetPuzzleResponse(user_id0, puzzle1, 1))
+        @fact GetPuzzleResponse(user_id0, puzzle0, 1) -->
+            not(GetPuzzleResponse(user_id1, puzzle0, 1))
     end
 
     context("Solution hash") do
@@ -63,14 +92,48 @@ facts("Niancat logic") do
     end
 
     context("Get puzzle") do
+        words = FakeWordDictionary(true, 1)
         command = GetPuzzleCommand(user_id0)
-        logic = Logic(Nullable{Puzzle}(puzzle0))
-        @fact handle(logic, command) --> GetPuzzleResponse(user_id0, puzzle0)
+        logic = Logic(Nullable{Puzzle}(puzzle0), words, 1)
+        @fact handle(logic, command) --> GetPuzzleResponse(user_id0, puzzle0, 1)
     end
 
     context("Get puzzle when not set") do
+        words = FakeWordDictionary(true, 1)
         command = GetPuzzleCommand(user_id0)
-        logic = Logic(Nullable{Puzzle}())
+        logic = Logic(words)
         @fact handle(logic, command) --> NoPuzzleSetResponse(user_id0)
+    end
+
+    context("Set puzzle") do
+        words = FakeWordDictionary(true, 1)
+        logic = Logic(words)
+        get_command = GetPuzzleCommand(user_id0)
+        set_command = SetPuzzleCommand(user_id0, Puzzle("ABCDEFGHI"))
+
+        expected = SetPuzzleResponse(user_id0, puzzle0, 1)
+
+        @fact handle(logic, set_command) --> expected
+        @fact handle(logic, get_command) --> GetPuzzleResponse(user_id0, puzzle0, 1)
+    end
+
+    context("Set invalid puzzle") do
+        words = FakeWordDictionary(true, 0)
+        logic = Logic(Nullable{Puzzle}(puzzle1), words, 1)
+        get_command = GetPuzzleCommand(user_id0)
+        set_command = SetPuzzleCommand(user_id0, puzzle0)
+        @fact handle(logic, set_command) --> InvalidPuzzleResponse(user_id0, puzzle0)
+        @fact handle(logic, get_command) --> NoPuzzleSetResponse(user_id0)
+    end
+
+    context("Set puzzle, multiple solutions") do
+        solutions = 17
+        words = FakeWordDictionary(true, solutions)
+        logic = Logic(words)
+        get_command = GetPuzzleCommand(user_id0)
+        set_command = SetPuzzleCommand(user_id0, Puzzle("ABCDEFGHI"))
+
+        @fact handle(logic, set_command) --> SetPuzzleResponse(user_id0, puzzle0, solutions)
+        @fact handle(logic, get_command) --> GetPuzzleResponse(user_id0, puzzle0, solutions)
     end
 end
