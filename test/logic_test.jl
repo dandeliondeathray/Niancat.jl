@@ -182,4 +182,8 @@ facts("Niancat logic") do
         command = IgnoredEventCommand(user_id0, text)
         @fact handle(logic, command) --> IgnoredEventResponse(user_id0, text)
     end
+
+    context("Normalized word in solution response") do
+        @pending true --> false
+    end
 end

@@ -10,6 +10,7 @@ find_name(t::AbstractMemberScroll, ::ChannelId) =
 
 abstract AbstractWordDictionary
 
+# Check is a word is in the dictionary.
 is_solution(d::AbstractWordDictionary, w::Word) =
     error("is_solution not implemented for $(d) and $(w)")
 no_of_solutions(d::AbstractWordDictionary, p::Puzzle) =
