@@ -48,12 +48,12 @@ end
 # Mocks
 #
 
-immutable FakeMemberScroll <: AbstractMemberScroll
-    user::Nullable{UTF8String}
-    channel::Nullable{UTF8String}
+immutable FakeMemberScroll <: AbstractMembers
+    user::Nullable{SlackName}
+    channel::Nullable{SlackName}
 
     FakeMemberScroll() = new(Nullable(), Nullable())
-    FakeMemberScroll(u::UTF8String) = new(Nullable(u), Nullable())
+    FakeMemberScroll(u::UTF8String) = new(Nullable(SlackName(u)), Nullable())
 end
 
 find_name(s::FakeMemberScroll, ::UserId) = s.user

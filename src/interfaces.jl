@@ -1,11 +1,11 @@
-export AbstractMemberScroll, AbstractWordDictionary, AbstractLogic,
+export AbstractMembers, AbstractWordDictionary, AbstractLogic,
        find_name, is_solution, no_of_solutions, handle
 
-abstract AbstractMemberScroll
+abstract AbstractMembers
 
-find_name(t::AbstractMemberScroll, ::UserId) =
+find_name(t::AbstractMembers, ::UserId) =
     error("find_name not implemented for $(t) and UserId")
-find_name(t::AbstractMemberScroll, ::ChannelId) =
+find_name(t::AbstractMembers, ::ChannelId) =
     error("find_name not implemented for $(t) and ChannelId")
 
 abstract AbstractWordDictionary

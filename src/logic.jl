@@ -12,12 +12,12 @@ abstract AbstractLogic
 type Logic
     puzzle::Nullable{Puzzle}
     words::AbstractWordDictionary
-    members::AbstractMemberScroll
+    members::AbstractMembers
     solutions::UInt
 
-    Logic(words::AbstractWordDictionary, m::AbstractMemberScroll) =
+    Logic(words::AbstractWordDictionary, m::AbstractMembers) =
         new(Nullable{Puzzle}(), words, m, 0)
-    Logic(p::Nullable{Puzzle}, words::AbstractWordDictionary, m::AbstractMemberScroll, s::Int) =
+    Logic(p::Nullable{Puzzle}, words::AbstractWordDictionary, m::AbstractMembers, s::Int) =
         new(Nullable{Puzzle}(p), words, m, s)
 end
 
@@ -49,9 +49,10 @@ function handle(logic::Logic, command::CheckSolutionCommand)
                 CorrectSolutionResponse(command.user, command.word),
                 UnknownUserSolutionResponse(command.user))
         end
+        # Note that `name` is a SlackName, not a UTF8String.
         name = get(maybe_name)
         normalized_word = normalize(command.word)
-        hash = solution_hash(utf8(normalized_word), name)
+        hash = solution_hash(utf8(normalized_word), name.v)
         return CompositeResponse(
             CorrectSolutionResponse(command.user, normalized_word),
             SolutionNotificationResponse(command.user, hash))
