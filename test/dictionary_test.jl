@@ -3,7 +3,9 @@ words = WordDictionary(Set{UTF8String}([
     "DATORSPEL",
     "SPELDATOR",
     "abcdefghi",
-    "ABCDEFåäö"
+    "ABCDEFåäö",
+    "ABCDEF---åäö",
+    "  ABCDEF   åäö  "
     ]))
 
 solution_tests = [
@@ -24,7 +26,7 @@ normalize_tests = [
     ("dator spel", "DATORSPEL"),
     ("dator-spel", "DATORSPEL"),
     ("  dator-spel\n", "DATORSPEL"),
-    ("abcdefåöl", "ABCDEFÅÄÖ")
+    ("abcdefåäö", "ABCDEFÅÄÖ")
 ]
 
 no_of_solutions_tests = [
@@ -38,6 +40,14 @@ no_of_solutions_tests = [
 ]
 
 facts("Word dictionary") do
+    context("Word type") do
+        @fact Word("ABC") --> Word("ABC")
+        @fact Word("ABC") --> not(Word("DEF"))
+
+        s = Set{Word}([Word("ABC")])
+        @fact Word("ABC") in s --> true
+    end
+
     context("Is solution") do
         for word in solution_tests
             @fact is_solution(words, Word(word)) --> true
@@ -50,7 +60,7 @@ facts("Word dictionary") do
 
     context("Normalization") do
         for (word, expected) in normalize_tests
-            @fact normalize(words, word) --> expected
+            @fact normalize(Word(word)) --> Word(expected)
         end
     end
 
