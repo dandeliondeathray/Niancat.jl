@@ -149,7 +149,7 @@ facts("Niancat logic") do
         solution_response, notification_response = response
 
         @fact solution_response --> CorrectSolutionResponse(user_id0, normalize(word))
-        @fact notification_response --> SolutionNotificationResponse(user_id0, expected_hash)
+        @fact notification_response --> SolutionNotificationResponse(SlackName(name), expected_hash)
     end
 
     context("Incorrect solution") do

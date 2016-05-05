@@ -55,7 +55,7 @@ function handle(logic::Logic, command::CheckSolutionCommand)
         hash = solution_hash(utf8(normalized_word), name.v)
         return CompositeResponse(
             CorrectSolutionResponse(command.user, normalized_word),
-            SolutionNotificationResponse(command.user, hash))
+            SolutionNotificationResponse(name, hash))
     else
         return IncorrectSolutionResponse(command.user, command.word)
     end

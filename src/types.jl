@@ -62,7 +62,7 @@ immutable CorrectSolutionResponse <: AbstractResponse
 end
 
 immutable SolutionNotificationResponse <: AbstractResponse
-    user::UserId
+    name::SlackName
     hash::UTF8String
 end
 
