@@ -50,9 +50,10 @@ function handle(logic::Logic, command::CheckSolutionCommand)
                 UnknownUserSolutionResponse(command.user))
         end
         name = get(maybe_name)
-        hash = solution_hash(utf8(command.word), name)
+        normalized_word = normalize(command.word)
+        hash = solution_hash(utf8(normalized_word), name)
         return CompositeResponse(
-            CorrectSolutionResponse(command.user, command.word),
+            CorrectSolutionResponse(command.user, normalized_word),
             SolutionNotificationResponse(command.user, hash))
     else
         return IncorrectSolutionResponse(command.user, command.word)

@@ -138,7 +138,7 @@ facts("Niancat logic") do
         name = utf8("erike")
         member_scroll = FakeMemberScroll(name)
         words = FakeWordDictionary(true, 1)
-        word = Word("GALLTJUTA")
+        word = Word("GALL-TJU TA")
         logic = Logic(words, member_scroll)
         expected_hash = utf8("d8e7363cdad6303dd4c41cb2ad3e2c35759257ca8ac509107e4e9e9ff5741933")
         command = CheckSolutionCommand(user_id0, word)
@@ -148,7 +148,7 @@ facts("Niancat logic") do
 
         solution_response, notification_response = response
 
-        @fact solution_response --> CorrectSolutionResponse(user_id0, word)
+        @fact solution_response --> CorrectSolutionResponse(user_id0, normalize(word))
         @fact notification_response --> SolutionNotificationResponse(user_id0, expected_hash)
     end
 
@@ -181,9 +181,5 @@ facts("Niancat logic") do
         text = utf8("some text")
         command = IgnoredEventCommand(user_id0, text)
         @fact handle(logic, command) --> IgnoredEventResponse(user_id0, text)
-    end
-
-    context("Normalized word in solution response") do
-        @pending true --> false
     end
 end
