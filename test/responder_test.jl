@@ -70,7 +70,15 @@ responder_tests = [
     ResponderTest(
         "Ignore events",
         IgnoredEventResponse(ChannelId("C0"), utf8("Some text")),
-        [])
+        []),
+
+    ResponderTest(
+        "Composite responses",
+        CompositeResponse(
+            CorrectSolutionResponse(ChannelId("D0"), Word("FOO")),
+            SolutionNotificationResponse(SlackName("erike"), utf8("abcdef"))),
+        [TestEvent(ChannelId("D0"), "FOO"),
+         TestEvent(ChannelId("C0123"), "erike", "abcdef")])
 ]
 
 type FakeRTMClient <: AbstractRTMClient

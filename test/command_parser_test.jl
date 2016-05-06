@@ -50,6 +50,11 @@ command_parser_tests = [
         CheckSolutionCommand(im_channel, test_user, Word("ABCDEFGHI"))),
 
     CommandParserTest(
+        "Check solution, with spaces",
+        "ABC DEF GHI", im_channel,
+        CheckSolutionCommand(im_channel, test_user, Word("ABCDEFGHI"))),
+
+    CommandParserTest(
         "No command",
         "  ", test_channel,
         IgnoredEventCommand(test_channel, test_user, "  ")),

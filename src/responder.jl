@@ -51,9 +51,15 @@ function respond(r::Responder, response::SetPuzzleResponse)
     if response.solutions == 1
         s = utf8("Dagens nia är satt till $(puzzle)")
     else
-        s = utf8("Dagens nia är satt till. $(puzzle)\nDen har $(response.solutions) lösningar.")
+        s = utf8("Dagens nia är satt till $(puzzle)\nDen har $(response.solutions) lösningar.")
     end
     send(r, response.channel, s)
 end
 
 respond(r::Responder, ::IgnoredEventResponse) = nothing
+
+function respond(r::Responder, c::CompositeResponse)
+    for x in c
+        respond(r, x)
+    end
+end

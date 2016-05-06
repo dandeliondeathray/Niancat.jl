@@ -16,7 +16,7 @@ commands = Dict{UTF8String, CommandParser}(
     "!nian" => CommandParser(GetPuzzleCommand),
     "!helpnian" => CommandParser(HelpCommand))
 
-check_command = CommandParser(1, CheckSolutionCommand, x -> [Word(x[1])])
+check_command = CommandParser(-1, CheckSolutionCommand, x -> [Word(join(x))])
 
 is_private(channel::ChannelId) = !isempty(channel.v) && first(channel) == 'D'
 
@@ -25,7 +25,7 @@ function parse_command_parser(
     parameters::Vector{SubString{UTF8String}},
     event::MessageEvent)
 
-    if length(parameters) != parser.parameters
+    if parser.parameters != -1 && length(parameters) != parser.parameters
         return InvalidCommand(event.channel, event.user, event.text, :wrong_no_of_parameters)
     end
 
@@ -39,9 +39,6 @@ function parse_command(event::MessageEvent)
     end
 
     command = parts[1]
-    if isempty(command)
-        return UnknownCommand(event.channel, event.user, event.text)
-    end
 
     if first(command) != '!'
         if is_private(event.channel)

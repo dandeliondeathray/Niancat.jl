@@ -9,7 +9,7 @@ end
 
 abstract AbstractLogic
 
-type Logic
+type Logic <: AbstractLogic
     puzzle::Nullable{Puzzle}
     words::AbstractWordDictionary
     members::AbstractMembers
