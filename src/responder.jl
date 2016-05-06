@@ -63,3 +63,11 @@ function respond(r::Responder, c::CompositeResponse)
         respond(r, x)
     end
 end
+
+function respond(r::Responder, response::InvalidCommandResponse)
+    if response.reason == :unknown
+        send(r, response.channel, utf8("Okänt kommando"))
+    else
+        send(r, response.channel, utf8("Fel: $(response.reason)"))
+    end
+end

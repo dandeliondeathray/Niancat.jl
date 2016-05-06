@@ -33,8 +33,7 @@ function on_event(h::NiancatHandler, event::MessageEvent)
     respond(h.responder, response)
 end
 
-# on error is called when there is a problem with receiving the message, such as invalid JSON.
-# This is not an error sent by Slack, but an error caught in this code.
+# Catch all other events we don't care about.
 on_error(h::NiancatHandler, reason::Symbol, text::UTF8String) = nothing
 on_reply(h::NiancatHandler, id::Int64, event::Event) = nothing
 on_event(h::NiancatHandler, event::Event) = nothing

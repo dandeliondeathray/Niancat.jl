@@ -78,7 +78,12 @@ responder_tests = [
             CorrectSolutionResponse(ChannelId("D0"), Word("FOO")),
             SolutionNotificationResponse(SlackName("erike"), utf8("abcdef"))),
         [TestEvent(ChannelId("D0"), "FOO"),
-         TestEvent(ChannelId("C0123"), "erike", "abcdef")])
+         TestEvent(ChannelId("C0123"), "erike", "abcdef")]),
+
+    ResponderTest(
+        "Invalid command",
+        InvalidCommandResponse(ChannelId("C0"), :unknown),
+        [TestEvent(ChannelId("C0"), "känt")])
 ]
 
 type FakeRTMClient <: AbstractRTMClient

@@ -43,4 +43,23 @@ facts("Integration") do
         @fact contains(msg.text, utf8("löste nian")) --> true
         @fact msg.channel --> ChannelId("C0")
     end
+
+    context("Invalid commands") do
+        members = Members()
+        rtm_client = FakeRTMClient()
+        words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
+
+        # Add fake users to the member list
+        add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
+
+        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"))
+
+        # Invalid setting of puzzle
+        on_event(handler,
+            MessageEvent("!setnian TOO MANY ARGUMENTS",
+                         ChannelId("C0"), UserId("U0"), EventTimestamp("123")))
+
+        msg = take_message!(rtm_client)
+        @fact msg.channel --> ChannelId("C0")
+    end
 end

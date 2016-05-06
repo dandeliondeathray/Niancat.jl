@@ -184,4 +184,12 @@ facts("Niancat logic") do
         command = IgnoredEventCommand(channel_id0, user_id0, text)
         @fact handle(logic, command) --> IgnoredEventResponse(channel_id0, text)
     end
+
+    context("Invalid command") do
+        member_scroll = FakeMemberScroll()
+        words = FakeWordDictionary(true, 1)
+        logic = Logic(words, member_scroll)
+        command = InvalidCommand(channel_id0, user_id0, "", :unknown)
+        @fact handle(logic, command) --> InvalidCommandResponse(channel_id0, :unknown)
+    end
 end
