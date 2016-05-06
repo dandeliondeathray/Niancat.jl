@@ -1,9 +1,9 @@
 import DandelionSlack: @newtype, @newimmutable, @stringinterface
 import Base: start, done, endof, next
 
-export Puzzle, Word, ChannelOrUser,
+export Puzzle, Word,
        AbstractCommand, AbstractResponse,
-       CheckSolutionCommand, GetPuzzleCommand, SetPuzzleCommand,
+       CheckSolutionCommand, GetPuzzleCommand, SetPuzzleCommand, HelpCommand, InvalidCommand,
        IncorrectSolutionResponse, CorrectSolutionResponse, SolutionNotificationResponse,
        GetPuzzleResponse, NoPuzzleSetResponse, SetPuzzleResponse, InvalidPuzzleResponse,
        CompositeResponse, UnknownUserSolutionResponse, IgnoredEventCommand, IgnoredEventResponse
@@ -45,6 +45,18 @@ immutable IgnoredEventCommand <: AbstractCommand
     channel::ChannelId
     user::UserId
     text::UTF8String
+end
+
+immutable HelpCommand <: AbstractCommand
+    channel::ChannelId
+    user::UserId
+end
+
+immutable InvalidCommand <: AbstractCommand
+    channel::ChannelId
+    user::UserId
+    text::UTF8String
+    reason::Symbol
 end
 
 #

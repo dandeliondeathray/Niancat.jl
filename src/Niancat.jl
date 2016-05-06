@@ -8,5 +8,6 @@ include("logic.jl")
 include("dictionary.jl")
 include("members.jl")
 include("responder.jl")
+include("command_parser.jl")
 
 end # module
