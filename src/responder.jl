@@ -17,6 +17,11 @@ macro response(response_type::Symbol, s::Expr)
     end
 end
 
+function prettify(p::Puzzle)
+    s = [p...]
+    utf8(s[1:3]) * " " * utf8(s[4:6]) * " " * utf8(s[7:9])
+end
+
 @response IncorrectSolutionResponse utf8("Ordet $(response.word) finns inte med i SAOL.")
 @response CorrectSolutionResponse   utf8("Ordet $(response.word) är korrekt!")
 @response NoPuzzleSetResponse utf8("Dagens nia är inte satt!")
@@ -31,20 +36,22 @@ respond(r::Responder, response::UnknownUserSolutionResponse) =
 
 function respond(r::Responder, response::GetPuzzleResponse)
     s = ""
+    puzzle = prettify(response.puzzle)
     if response.solutions == 1
-        s = utf8("$(response.puzzle)")
+        s = utf8("$(puzzle)")
     else
-        s = utf8("$(response.puzzle)\nDen har $(response.solutions) lösningar.")
+        s = utf8("$(puzzle)\nDen har $(response.solutions) lösningar.")
     end
     send(r, response.channel, s)
 end
 
 function respond(r::Responder, response::SetPuzzleResponse)
     s = ""
+    puzzle = prettify(response.puzzle)
     if response.solutions == 1
-        s = utf8("Dagens nia är satt till $(response.puzzle)")
+        s = utf8("Dagens nia är satt till $(puzzle)")
     else
-        s = utf8("Dagens nia är satt till. $(response.puzzle)\nDen har $(response.solutions) lösningar.")
+        s = utf8("Dagens nia är satt till. $(puzzle)\nDen har $(response.solutions) lösningar.")
     end
     send(r, response.channel, s)
 end

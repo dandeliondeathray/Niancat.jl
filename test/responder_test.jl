@@ -1,6 +1,7 @@
 main_channel_id = ChannelId("C0123")
 
 import DandelionSlack: OutgoingEvent, OutgoingMessageEvent, AbstractRTMClient, send_event
+import Niancat: prettify
 
 type TestEvent
     channel::ChannelId
@@ -38,13 +39,13 @@ responder_tests = [
 
     ResponderTest(
         "Get puzzle, many solutions",
-        GetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLE"), 17),
-        [TestEvent(ChannelId("C0"), "PUZZLE", "17")]),
+        GetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLEABC"), 17),
+        [TestEvent(ChannelId("C0"), "PUZ ZLE ABC", "17")]),
 
     ResponderTest(
         "Get puzzle, one solution",
-        GetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLE"), 1),
-        [TestEvent(ChannelId("C0"), "PUZZLE"; has_not=["1"])]),
+        GetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLEABC"), 1),
+        [TestEvent(ChannelId("C0"), "PUZ ZLE ABC"; has_not=["1"])]),
 
     ResponderTest(
         "No puzzle set",
@@ -53,13 +54,13 @@ responder_tests = [
 
     ResponderTest(
         "Set puzzle response, many solutions",
-        SetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLE"), 17),
-        [TestEvent(ChannelId("C0"), "PUZZLE", "17")]),
+        SetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLEABC"), 17),
+        [TestEvent(ChannelId("C0"), "PUZ ZLE ABC", "17")]),
 
     ResponderTest(
         "Set puzzle response, one solution",
-        SetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLE"), 1),
-        [TestEvent(ChannelId("C0"), "PUZZLE"; has_not=["1"])]),
+        SetPuzzleResponse(ChannelId("C0"), Puzzle("PUZZLEABC"), 1),
+        [TestEvent(ChannelId("C0"), "PUZ ZLE ABC"; has_not=["1"])]),
 
     ResponderTest(
         "Invalid puzzle",
@@ -88,6 +89,11 @@ function take_message!(c::FakeRTMClient)
 end
 
 facts("Responder") do
+    context("Prettify solutions") do
+        @fact prettify(Puzzle("PUZZLEABC")) --> Puzzle("PUZ ZLE ABC")
+        @fact prettify(Puzzle("ÅABCDEFÄÖ")) --> Puzzle("ÅAB CDE FÄÖ")
+    end
+
     for t in responder_tests
         context(t.description) do
             client = FakeRTMClient()
