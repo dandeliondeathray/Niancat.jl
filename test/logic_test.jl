@@ -23,6 +23,7 @@ hash_tests = [
 user_id0    = UserId("U0")
 user_id1    = UserId("U1")
 channel_id0 = ChannelId("C0")
+channel_id1 = ChannelId("C1")
 puzzle0     = Puzzle("ABCDEFGHI")
 puzzle1     = Puzzle("GHIJKLMNO")
 
@@ -75,11 +76,12 @@ no_of_solutions(f::FakeWordDictionary, w::Puzzle) = f.no_of_solutions_
 
 facts("Niancat logic") do
     context("Test response equality") do
-        @fact GetPuzzleResponse(user_id0, puzzle0, 1) --> GetPuzzleResponse(user_id0, puzzle0, 1)
-        @fact GetPuzzleResponse(user_id0, puzzle0, 1) -->
-            not(GetPuzzleResponse(user_id0, puzzle1, 1))
-        @fact GetPuzzleResponse(user_id0, puzzle0, 1) -->
-            not(GetPuzzleResponse(user_id1, puzzle0, 1))
+        @fact GetPuzzleResponse(channel_id0, puzzle0, 1) -->
+            GetPuzzleResponse(channel_id0, puzzle0, 1)
+        @fact GetPuzzleResponse(channel_id0, puzzle0, 1) -->
+            not(GetPuzzleResponse(channel_id0, puzzle1, 1))
+        @fact GetPuzzleResponse(channel_id0, puzzle0, 1) -->
+            not(GetPuzzleResponse(channel_id1, puzzle0, 1))
     end
 
     context("Solution hash") do
@@ -90,48 +92,48 @@ facts("Niancat logic") do
 
     context("Get puzzle") do
         words = FakeWordDictionary(true, 1)
-        command = GetPuzzleCommand(user_id0)
+        command = GetPuzzleCommand(channel_id0, user_id0)
         logic = Logic(Nullable{Puzzle}(puzzle0), words, fake_members, 1)
-        @fact handle(logic, command) --> GetPuzzleResponse(user_id0, puzzle0, 1)
+        @fact handle(logic, command) --> GetPuzzleResponse(channel_id0, puzzle0, 1)
     end
 
     context("Get puzzle when not set") do
         words = FakeWordDictionary(true, 1)
-        command = GetPuzzleCommand(user_id0)
+        command = GetPuzzleCommand(channel_id0, user_id0)
         logic = Logic(words, fake_members)
-        @fact handle(logic, command) --> NoPuzzleSetResponse(user_id0)
+        @fact handle(logic, command) --> NoPuzzleSetResponse(channel_id0)
     end
 
     context("Set puzzle") do
         words = FakeWordDictionary(true, 1)
         logic = Logic(words, fake_members)
-        get_command = GetPuzzleCommand(user_id0)
-        set_command = SetPuzzleCommand(user_id0, Puzzle("ABCDEFGHI"))
+        get_command = GetPuzzleCommand(channel_id0, user_id0)
+        set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
 
-        expected = SetPuzzleResponse(user_id0, puzzle0, 1)
+        expected = SetPuzzleResponse(channel_id0, puzzle0, 1)
 
         @fact handle(logic, set_command) --> expected
-        @fact handle(logic, get_command) --> GetPuzzleResponse(user_id0, puzzle0, 1)
+        @fact handle(logic, get_command) --> GetPuzzleResponse(channel_id0, puzzle0, 1)
     end
 
     context("Set invalid puzzle") do
         words = FakeWordDictionary(true, 0)
         logic = Logic(Nullable{Puzzle}(puzzle1), words, fake_members, 1)
-        get_command = GetPuzzleCommand(user_id0)
-        set_command = SetPuzzleCommand(user_id0, puzzle0)
-        @fact handle(logic, set_command) --> InvalidPuzzleResponse(user_id0, puzzle0)
-        @fact handle(logic, get_command) --> NoPuzzleSetResponse(user_id0)
+        get_command = GetPuzzleCommand(channel_id0, user_id0)
+        set_command = SetPuzzleCommand(channel_id0, user_id0, puzzle0)
+        @fact handle(logic, set_command) --> InvalidPuzzleResponse(channel_id0, puzzle0)
+        @fact handle(logic, get_command) --> NoPuzzleSetResponse(channel_id0)
     end
 
     context("Set puzzle, multiple solutions") do
         solutions = 17
         words = FakeWordDictionary(true, solutions)
         logic = Logic(words, fake_members)
-        get_command = GetPuzzleCommand(user_id0)
-        set_command = SetPuzzleCommand(user_id0, Puzzle("ABCDEFGHI"))
+        get_command = GetPuzzleCommand(channel_id0, user_id0)
+        set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
 
-        @fact handle(logic, set_command) --> SetPuzzleResponse(user_id0, puzzle0, solutions)
-        @fact handle(logic, get_command) --> GetPuzzleResponse(user_id0, puzzle0, solutions)
+        @fact handle(logic, set_command) --> SetPuzzleResponse(channel_id0, puzzle0, solutions)
+        @fact handle(logic, get_command) --> GetPuzzleResponse(channel_id0, puzzle0, solutions)
     end
 
     context("Solve the puzzle") do
@@ -141,14 +143,14 @@ facts("Niancat logic") do
         word = Word("GALL-TJU TA")
         logic = Logic(words, member_scroll)
         expected_hash = utf8("d8e7363cdad6303dd4c41cb2ad3e2c35759257ca8ac509107e4e9e9ff5741933")
-        command = CheckSolutionCommand(user_id0, word)
+        command = CheckSolutionCommand(channel_id0, user_id0, word)
 
         response = handle(logic, command)
         @fact isa(response, CompositeResponse) --> true
 
         solution_response, notification_response = response
 
-        @fact solution_response --> CorrectSolutionResponse(user_id0, normalize(word))
+        @fact solution_response --> CorrectSolutionResponse(channel_id0, normalize(word))
         @fact notification_response --> SolutionNotificationResponse(SlackName(name), expected_hash)
     end
 
@@ -157,8 +159,8 @@ facts("Niancat logic") do
         words = FakeWordDictionary(false, 1)
         logic = Logic(words, member_scroll)
         word = Word("GALLTJUTA")
-        command = CheckSolutionCommand(user_id0, word)
-        @fact handle(logic, command) --> IncorrectSolutionResponse(user_id0, word)
+        command = CheckSolutionCommand(channel_id0, user_id0, word)
+        @fact handle(logic, command) --> IncorrectSolutionResponse(channel_id0, word)
     end
 
     context("Unknown user") do
@@ -166,11 +168,11 @@ facts("Niancat logic") do
         words = FakeWordDictionary(true, 1)
         logic = Logic(words, member_scroll)
         word = Word("GALLTJUTA")
-        command = CheckSolutionCommand(user_id0, word)
+        command = CheckSolutionCommand(channel_id0, user_id0, word)
         response = handle(logic, command)
         @fact isa(response, CompositeResponse) --> true
         correct_response, unknown_response = response
-        @fact correct_response --> CorrectSolutionResponse(user_id0, word)
+        @fact correct_response --> CorrectSolutionResponse(channel_id0, word)
         @fact unknown_response --> UnknownUserSolutionResponse(user_id0)
     end
 
@@ -179,7 +181,7 @@ facts("Niancat logic") do
         words = FakeWordDictionary(true, 1)
         logic = Logic(words, member_scroll)
         text = utf8("some text")
-        command = IgnoredEventCommand(user_id0, text)
-        @fact handle(logic, command) --> IgnoredEventResponse(user_id0, text)
+        command = IgnoredEventCommand(channel_id0, user_id0, text)
+        @fact handle(logic, command) --> IgnoredEventResponse(channel_id0, text)
     end
 end

@@ -23,10 +23,10 @@ end
 
 function handle(logic::Logic, command::GetPuzzleCommand)
     if isnull(logic.puzzle)
-        return NoPuzzleSetResponse(command.from)
+        return NoPuzzleSetResponse(command.channel)
     end
 
-    GetPuzzleResponse(command.from, get(logic.puzzle), logic.solutions)
+    GetPuzzleResponse(command.channel, get(logic.puzzle), logic.solutions)
 end
 
 function handle(logic::Logic, command::SetPuzzleCommand)
@@ -34,11 +34,11 @@ function handle(logic::Logic, command::SetPuzzleCommand)
 
     if logic.solutions == 0
         logic.puzzle = Nullable{Puzzle}()
-        return InvalidPuzzleResponse(command.from, command.puzzle)
+        return InvalidPuzzleResponse(command.channel, command.puzzle)
     end
 
     logic.puzzle = command.puzzle
-    SetPuzzleResponse(command.from, command.puzzle, logic.solutions)
+    SetPuzzleResponse(command.channel, command.puzzle, logic.solutions)
 end
 
 function handle(logic::Logic, command::CheckSolutionCommand)
@@ -46,7 +46,7 @@ function handle(logic::Logic, command::CheckSolutionCommand)
         maybe_name = find_name(logic.members, command.user)
         if isnull(maybe_name)
             return CompositeResponse(
-                CorrectSolutionResponse(command.user, command.word),
+                CorrectSolutionResponse(command.channel, command.word),
                 UnknownUserSolutionResponse(command.user))
         end
         # Note that `name` is a SlackName, not a UTF8String.
@@ -54,11 +54,11 @@ function handle(logic::Logic, command::CheckSolutionCommand)
         normalized_word = normalize(command.word)
         hash = solution_hash(utf8(normalized_word), name.v)
         return CompositeResponse(
-            CorrectSolutionResponse(command.user, normalized_word),
+            CorrectSolutionResponse(command.channel, normalized_word),
             SolutionNotificationResponse(name, hash))
     else
-        return IncorrectSolutionResponse(command.user, command.word)
+        return IncorrectSolutionResponse(command.channel, command.word)
     end
 end
 
-handle(::Logic, command::IgnoredEventCommand) = IgnoredEventResponse(command.from, command.text)
+handle(::Logic, command::IgnoredEventCommand) = IgnoredEventResponse(command.channel, command.text)

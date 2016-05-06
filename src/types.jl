@@ -18,8 +18,6 @@ export Puzzle, Word, ChannelOrUser,
 @newimmutable Word <: UTF8String
 @stringinterface Word
 
-ChannelOrUser = Union{UserId, ChannelId}
-
 #
 # Commands
 #
@@ -27,21 +25,25 @@ ChannelOrUser = Union{UserId, ChannelId}
 abstract AbstractCommand
 
 immutable CheckSolutionCommand <: AbstractCommand
+    channel::ChannelId
     user::UserId
     word::Word
 end
 
 immutable GetPuzzleCommand <: AbstractCommand
-    from::ChannelOrUser
+    channel::ChannelId
+    user::UserId
 end
 
 immutable SetPuzzleCommand <: AbstractCommand
-    from::ChannelOrUser
+    channel::ChannelId
+    user::UserId
     puzzle::Puzzle
 end
 
 immutable IgnoredEventCommand <: AbstractCommand
-    from::ChannelOrUser
+    channel::ChannelId
+    user::UserId
     text::UTF8String
 end
 
@@ -52,12 +54,12 @@ end
 abstract AbstractResponse
 
 immutable IncorrectSolutionResponse <: AbstractResponse
-    user::UserId
+    channel::ChannelId
     word::Word
 end
 
 immutable CorrectSolutionResponse <: AbstractResponse
-    user::UserId
+    channel::ChannelId
     word::Word
 end
 
@@ -71,28 +73,28 @@ immutable UnknownUserSolutionResponse <: AbstractResponse
 end
 
 immutable GetPuzzleResponse <: AbstractResponse
-    from::ChannelOrUser
+    channel::ChannelId
     puzzle::Puzzle
     solutions::UInt
 end
 
 immutable NoPuzzleSetResponse <: AbstractResponse
-    from::ChannelOrUser
+    channel::ChannelId
 end
 
 immutable SetPuzzleResponse <: AbstractResponse
-    from::ChannelOrUser
+    channel::ChannelId
     puzzle::Puzzle
     solutions::UInt
 end
 
 immutable InvalidPuzzleResponse <: AbstractResponse
-    from::ChannelOrUser
+    channel::ChannelId
     puzzle::Puzzle
 end
 
 immutable IgnoredEventResponse <: AbstractResponse
-    from::ChannelOrUser
+    channel::ChannelId
     text::UTF8String
 end
 
