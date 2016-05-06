@@ -24,7 +24,12 @@ responder_tests = [
     ResponderTest(
         "Incorrect solution response to user",
         IncorrectSolutionResponse(ChannelId("D0"), Word("FOO")),
-        [TestEvent(ChannelId("D0"), "FOO")])
+        [TestEvent(ChannelId("D0"), "FOO")]),
+
+    ResponderTest(
+        "Correct solution response to user",
+        CorrectSolutionResponse(ChannelId("D0"), Word("FOO")),
+        [TestEvent(ChannelId("D0"), "FOO")]),
 ]
 
 type FakeRTMClient <: AbstractRTMClient

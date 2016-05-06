@@ -13,5 +13,12 @@ send(r::Responder, channelId::ChannelId, text::UTF8String) =
 respond(r::Responder, response::SolutionNotificationResponse) =
     send(r, r.main_channel, utf8("$(response.name) löste nian: $(response.hash)"))
 
-respond(r::Responder, response::IncorrectSolutionResponse) =
-    send(r, response.channel, utf8("Ordet $(response.word) finns inte med i SAOL."))
+macro response(response_type::Symbol, s::Expr)
+    quote
+        $(esc(:respond))(r::Responder, response::$response_type) =
+            send(r, response.channel, $s)
+    end
+end
+
+@response IncorrectSolutionResponse utf8("Ordet $(response.word) finns inte med i SAOL.")
+@response CorrectSolutionResponse   utf8("Ordet $(response.word) är korrekt!")
