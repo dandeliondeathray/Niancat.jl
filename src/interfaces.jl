@@ -19,3 +19,5 @@ no_of_solutions(d::AbstractWordDictionary, p::Puzzle) =
 abstract AbstractLogic
 
 handle(l::AbstractLogic, c::AbstractCommand) = error("handle not implemented for $(l) and $(c)")
+
+abstract AbstractResponder

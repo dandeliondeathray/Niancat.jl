@@ -1,12 +1,12 @@
 main_channel_id = ChannelId("C0123")
 
-type TestEvent
-    has_texts::Vector{UTF8String}
-    channel::Nullable{ChannelId}
-    user::Nullable{UserId}
+import DandelionSlack: OutgoingEvent, OutgoingMessageEvent, AbstractRTMClient, send_event
 
-    TestEvent(xs...; channel=Nullable{ChannelId}(), user=Nullable{UserId}()) =
-        new(xs.., channel, user)
+type TestEvent
+    channel::ChannelId
+    has_texts::Vector{UTF8String}
+
+    TestEvent(channelId::ChannelId, xs...) = new(channelId, [xs...])
 end
 
 type ResponderTest
@@ -17,19 +17,23 @@ end
 
 responder_tests = [
     ResponderTest(
+        "Solution notification response to main channel",
         SolutionNotificationResponse(SlackName("erike"), utf8("abcdef")),
-        [TestEvent("erike", "abcdef"; channel=main_channel_id)]),
+        [TestEvent(main_channel_id, "erike", "abcdef")]),
 
     ResponderTest(
-        IncorrectSolutionResponse(UserId("U0"), Word("FOO")),
-        [TestEvent("FOO"; user=UserId("U0"))]
+        "Incorrect solution response to user",
+        IncorrectSolutionResponse(ChannelId("D0"), Word("FOO")),
+        [TestEvent(ChannelId("D0"), "FOO")])
 ]
 
 type FakeRTMClient <: AbstractRTMClient
     messages::Vector{OutgoingEvent}
+
+    FakeRTMClient() = new([])
 end
 
-send_event(c::FakeRTMClient, event::OutgoingEvent) = append!(c.messages, event)
+send_event(c::FakeRTMClient, event::OutgoingEvent) = push!(c.messages, event)
 
 function take_message!(c::FakeRTMClient)
     @fact c.messages --> not(isempty)
@@ -49,13 +53,7 @@ facts("Responder") do
             for test_event in t.expected
                 message = take_message!(client)
 
-                if !isnull(test_event.channel)
-                    @fact message.channel --> test_event.channel
-                end
-
-                if !isnull(test_event.user)
-                    @fact message.user --> test_event.user
-                end
+                @fact message.channel --> test_event.channel
 
                 for text in test_event.has_texts
                     @fact contains(message.text, text) --> true

@@ -7,5 +7,6 @@ include("interfaces.jl")
 include("logic.jl")
 include("dictionary.jl")
 include("members.jl")
+include("responder.jl")
 
 end # module
