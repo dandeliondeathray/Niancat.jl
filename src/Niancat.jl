@@ -1,6 +1,6 @@
 module Niancat
 
-export NiancatHandler, on_reply, on_event, on_error, create_bot
+export NiancatHandler, on_reply, on_event, on_error, on_create, create_bot
 
 using DandelionSlack
 import DandelionSlack: RTMHandler, on_reply, on_event, on_error
@@ -23,43 +23,35 @@ type NiancatHandler <: RTMHandler
     logic::AbstractLogic
     responder::Nullable{AbstractResponder}
     main_channel_id::ChannelId
+    token::Token
 
     function NiancatHandler(
-        rtm_client::AbstractRTMClient,
         members::AbstractMembers,
         words::AbstractWordDictionary,
-        main_channel_id::ChannelId)
+        main_channel_id::ChannelId,
+        token::Token)
 
         new(members,
             Logic(words, members),
-            Nullable{AbstractResponder}(Responder(rtm_client, main_channel_id)),
-            main_channel_id)
-    end
-
-    function NiancatHandler(members::AbstractMembers,
-                            words::AbstractWordDictionary,
-                            main_channel_id::ChannelId)
-        new(members, Logic(words, members), Nullable(), main_channel_id)
+            Nullable{AbstractResponder}(),
+            main_channel_id,
+            token)
     end
 end
 
 function on_create(h::NiancatHandler, client::AbstractRTMClient)
-    h.responder = Nullable{AbstractResponder}(client, h.main_channel_id)
+    h.responder = Nullable{AbstractResponder}(Responder(client, h.main_channel_id))
 end
 
 function on_event(h::NiancatHandler, event::MessageEvent)
+    command = parse_command(event)
+    response = handle(h.logic, command)
     if !isnull(h.responder)
-        command = parse_command(event)
-        response = handle(h.logic, command)
-        respond(h.responder, response)
+        respond(get(h.responder), response)
     end
 end
 
 function on_event(h::NiancatHandler, ::HelloEvent)
-    users_response = makerequest(UsersList(Nullable{Int}()), requests)
-    for u in users_response.users
-        add(h.members, u)
-    end
 end
 
 # Catch all other events we don't care about.
@@ -70,9 +62,5 @@ on_event(h::NiancatHandler, event::Event) = nothing
 #
 # Initialize the bot by reading the dictionary.
 #
-
-function create_bot(dictionary_stream::IO, token::UTF8String, main_channel_id::ChannelId;
-                    connector=DandelionSlack.rtm_connect)
-end
 
 end # module

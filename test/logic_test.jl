@@ -1,6 +1,6 @@
 import Base.==
 
-import Niancat: find_name, is_solution, no_of_solutions, handle
+import Niancat: is_solution, no_of_solutions, handle
 
 #
 # Test data
@@ -48,17 +48,6 @@ end
 #
 # Mocks
 #
-
-immutable FakeMemberScroll <: AbstractMembers
-    user::Nullable{SlackName}
-    channel::Nullable{SlackName}
-
-    FakeMemberScroll() = new(Nullable(), Nullable())
-    FakeMemberScroll(u::UTF8String) = new(Nullable(SlackName(u)), Nullable())
-end
-
-find_name(s::FakeMemberScroll, ::UserId) = s.user
-find_name(s::FakeMemberScroll, ::ChannelId) = s.channel
 
 fake_members = FakeMemberScroll()
 

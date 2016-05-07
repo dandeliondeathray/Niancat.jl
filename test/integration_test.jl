@@ -1,16 +1,22 @@
-
 facts("Integration") do
     context("Set, get and solve the puzzle") do
         members = Members()
         rtm_client = FakeRTMClient()
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
+        token = Token("sometoken")
+
+        handler = NiancatHandler(members, words, ChannelId("C0"), token)
+
+        # Calling on_create lets the handler get a reference to RTMClient
+        on_create(handler, rtm_client)
 
         # Add fake users to the member list
         add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
 
-        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"))
+        # A HelloEvent is the first event received when connected.
+        on_event(handler, HelloEvent())
 
-        # Set te puzzle
+        # Set the puzzle
         on_event(handler,
             MessageEvent("!setnian ABCDEFGHI", ChannelId("C0"), UserId("U0"), EventTimestamp("123")))
 
@@ -48,11 +54,16 @@ facts("Integration") do
         members = Members()
         rtm_client = FakeRTMClient()
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
+        token = Token("sometoken")
+
+        handler = NiancatHandler(members, words, ChannelId("C0"), token)
+
+        on_create(handler, rtm_client)
 
         # Add fake users to the member list
         add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
 
-        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"))
+        on_event(handler, HelloEvent())
 
         # Invalid setting of puzzle
         on_event(handler,
