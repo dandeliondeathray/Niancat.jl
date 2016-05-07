@@ -19,7 +19,7 @@ include("word_filter.jl")
 # responder.
 #
 type NiancatHandler <: RTMHandler
-    members::Members
+    members::AbstractMembers
     logic::AbstractLogic
     responder::Nullable{AbstractResponder}
     main_channel_id::ChannelId
@@ -52,6 +52,7 @@ function on_event(h::NiancatHandler, event::MessageEvent)
 end
 
 function on_event(h::NiancatHandler, ::HelloEvent)
+    retrieve_user_list(h.members, h.token)
 end
 
 # Catch all other events we don't care about.

@@ -1,6 +1,6 @@
 facts("Integration") do
     context("Set, get and solve the puzzle") do
-        members = Members()
+        members = FakeMemberScroll()
         rtm_client = FakeRTMClient()
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
         token = Token("sometoken")
@@ -14,7 +14,10 @@ facts("Integration") do
         add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
 
         # A HelloEvent is the first event received when connected.
+        # This must lead to a call to retrieve_user_list(::Members).
+        @fact members.retrieve_calls --> 0
         on_event(handler, HelloEvent())
+        @fact members.retrieve_calls --> 1
 
         # Set the puzzle
         on_event(handler,
@@ -51,7 +54,7 @@ facts("Integration") do
     end
 
     context("Invalid commands") do
-        members = Members()
+        members = FakeMemberScroll()
         rtm_client = FakeRTMClient()
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
         token = Token("sometoken")

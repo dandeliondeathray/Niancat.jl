@@ -127,7 +127,7 @@ facts("Niancat logic") do
 
     context("Solve the puzzle") do
         name = utf8("erike")
-        member_scroll = FakeMemberScroll(name)
+        member_scroll = FakeMemberScroll(user_id0, name)
         words = FakeWordDictionary(true, 1)
         word = Word("GALL-TJU TA")
         logic = Logic(words, member_scroll)

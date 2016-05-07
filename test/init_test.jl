@@ -28,4 +28,7 @@ facts("Bot initialization") do
         end
     end
 
+    context("Initialize the bot") do
+
+    end
 end
