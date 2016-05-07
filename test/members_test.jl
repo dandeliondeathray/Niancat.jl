@@ -108,6 +108,17 @@ facts("Members") do
         add(members, u("U0", "User 0 again"))
         @fact find_name(members, UserId("U0")) --> Nullable{SlackName}(SlackName("User 0 again"))
     end
+
+    context("Get members from a WebAPI call") do
+        ok_status = DandelionSlack.Status(true, Nullable(), Nullable())
+        users_list = UsersListResponse([u("U0", "User 0"), u("U1", "User 1")])
+        fake_users_list = x -> (ok_status, users_list)
+        members = Members(;web_api_call=fake_users_list)
+        retrieve_user_list(members, Token("sometoken"))
+
+        @fact find_name(members, UserId("U0")) --> Nullable{SlackName}(SlackName("User 0"))
+        @fact find_name(members, UserId("U1")) --> Nullable{SlackName}(SlackName("User 1"))
+    end
 end
 
 
