@@ -83,7 +83,12 @@ responder_tests = [
     ResponderTest(
         "Invalid command",
         InvalidCommandResponse(ChannelId("C0"), :unknown),
-        [TestEvent(ChannelId("C0"), "känt")])
+        [TestEvent(ChannelId("C0"), "känt")]),
+
+    ResponderTest(
+        "Help command",
+        HelpResponse(ChannelId("C0")),
+        [TestEvent(ChannelId("C0"), "!setnian", "!nian", "!helpnian")])
 ]
 
 type FakeRTMClient <: AbstractRTMClient

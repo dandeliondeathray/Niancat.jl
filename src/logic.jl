@@ -63,3 +63,4 @@ end
 
 handle(::Logic, command::IgnoredEventCommand) = IgnoredEventResponse(command.channel, command.text)
 handle(::Logic, command::InvalidCommand) = InvalidCommandResponse(command.channel, command.reason)
+handle(::Logic, command::HelpCommand) = HelpResponse(command.channel)

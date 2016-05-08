@@ -22,10 +22,32 @@ function prettify(p::Puzzle)
     utf8(s[1:3]) * " " * utf8(s[4:6]) * " " * utf8(s[7:9])
 end
 
+help_text = """
+"Dagens nia" är ett ordpussel från Svenska Dagbladet. Varje dag får man nio bokstäver, och ska hitta
+vilket svenskt ord man kan konstruera med hjälp av dessa bokstäver.
+Boten 'tiancat' hjälper dig att lösa nian genom att kontrollera om ord finns med i SAOL eller inte,
+och att bokstäverna matchar dagens nia. Om du skriver in ett lösningsförslag i ett privat-meddelande
+till boten så kommer den säga till om ordet är korrekt, och i sådana fall automatiskt notifiera
+kanalen om att du hittat en lösning.
+
+Innan du har löst dagens nia är det bra om du inte skriver in lösningsförslag i kanalen, då det är
+möjligt att du är nära utan att veta om det, och därmed i praktiken löser den åt andra. När du löst
+den kan du skriva lösningsförslag i kanalen, men håll dig gärna till ord som inte är nära den
+riktiga lösningen.
+
+Kommandon:
+    !setnian <pussel>   Sätt nian.
+    !nian               Visa nian.
+    !helpnian           Visa denna hjälptext.
+
+Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till tiancat.
+"""
+
 @response IncorrectSolutionResponse utf8("Ordet $(response.word) finns inte med i SAOL.")
 @response CorrectSolutionResponse   utf8("Ordet $(response.word) är korrekt!")
 @response NoPuzzleSetResponse utf8("Dagens nia är inte satt!")
 @response InvalidPuzzleResponse utf8("$(response.puzzle) är inte giltig!")
+@response HelpResponse utf8(help_text)
 
 respond(r::Responder, response::SolutionNotificationResponse) =
     send(r, r.main_channel, utf8("$(response.name) löste nian: $(response.hash)"))
