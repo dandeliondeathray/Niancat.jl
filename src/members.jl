@@ -33,6 +33,6 @@ find_name(m::Members, channelId::ChannelId) =
 function retrieve_user_list(m::Members, token::Token)
     status, user_list = m.web_api_call(UsersList(token, Nullable{Int}()))
     if status.ok
-        add(m, user_list.users...)
+        add(m, user_list.members...)
     end
 end

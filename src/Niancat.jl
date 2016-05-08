@@ -40,19 +40,25 @@ type NiancatHandler <: RTMHandler
 end
 
 function on_create(h::NiancatHandler, client::AbstractRTMClient)
+    println("Handler created. Creating responder.")
     h.responder = Nullable{AbstractResponder}(Responder(client, h.main_channel_id))
+    println("Created responder.")
 end
 
 function on_event(h::NiancatHandler, event::MessageEvent)
     command = parse_command(event)
+    println("Received command: $command")
     response = handle(h.logic, command)
+    println("Response: $response")
     if !isnull(h.responder)
         respond(get(h.responder), response)
     end
 end
 
 function on_event(h::NiancatHandler, ::HelloEvent)
+    println("Hello event received. Niancat is connected. Retrieving members...")
     retrieve_user_list(h.members, h.token)
+    println("Members retrieved.")
 end
 
 # Catch all other events we don't care about.
