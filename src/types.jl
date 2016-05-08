@@ -69,6 +69,7 @@ abstract AbstractResponse
 immutable IncorrectSolutionResponse <: AbstractResponse
     channel::ChannelId
     word::Word
+    reason::Symbol
 end
 
 immutable CorrectSolutionResponse <: AbstractResponse

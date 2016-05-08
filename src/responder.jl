@@ -43,7 +43,6 @@ Kommandon:
 Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till tiancat.
 """
 
-@response IncorrectSolutionResponse utf8("Ordet $(response.word) finns inte med i SAOL.")
 @response CorrectSolutionResponse   utf8("Ordet $(response.word) är korrekt!")
 @response NoPuzzleSetResponse utf8("Dagens nia är inte satt!")
 @response InvalidPuzzleResponse utf8("$(response.puzzle) är inte giltig!")
@@ -55,6 +54,21 @@ respond(r::Responder, response::SolutionNotificationResponse) =
 respond(r::Responder, response::UnknownUserSolutionResponse) =
     send(r, r.main_channel, utf8("<@$(response.user)> löste nian, men är en okänd användare"))
 
+function respond(r::Responder, response::IncorrectSolutionResponse)
+    # @response IncorrectSolutionResponse utf8("Ordet $(response.word) finns inte med i SAOL.")
+    response_text = utf8("")
+    if response.reason == :not_in_dictionary
+        text = "Ordet $(response.word) finns inte med i SAOL."
+    elseif response.reason == :not_nine_characters
+        text = "Ordet $(response.word) är inte nio tecken långt."
+    elseif response.reason == :not_correct_characters
+        text = "Ordet $(response.word) matchar inte dagens nian."
+    else
+        text = "Ordet $(response.word) är inkorrekt, men av oklara skäl."
+    end
+
+    send(r, response.channel, utf8(text))
+end
 
 function respond(r::Responder, response::GetPuzzleResponse)
     s = ""

@@ -7,6 +7,8 @@ function solution_hash(word::UTF8String, nick::UTF8String)
     Nettle.hexdigest("sha256", word * nick)
 end
 
+matches(puzzle::Puzzle, word::Word) = sort_and_normalize(puzzle.v) == sort_and_normalize(word.v)
+
 abstract AbstractLogic
 
 type Logic <: AbstractLogic
@@ -42,6 +44,18 @@ function handle(logic::Logic, command::SetPuzzleCommand)
 end
 
 function handle(logic::Logic, command::CheckSolutionCommand)
+    if isnull(logic.puzzle)
+        return NoPuzzleSetResponse(command.channel)
+    end
+
+    if length(normalize(command.word)) != 9
+        return IncorrectSolutionResponse(command.channel, command.word, :not_nine_characters)
+    end
+
+    if !matches(get(logic.puzzle), command.word)
+        return IncorrectSolutionResponse(command.channel, command.word, :not_correct_characters)
+    end
+
     if is_solution(logic.words, command.word)
         maybe_name = find_name(logic.members, command.user)
         if isnull(maybe_name)
@@ -57,7 +71,7 @@ function handle(logic::Logic, command::CheckSolutionCommand)
             CorrectSolutionResponse(command.channel, normalized_word),
             SolutionNotificationResponse(name, hash))
     else
-        return IncorrectSolutionResponse(command.channel, command.word)
+        return IncorrectSolutionResponse(command.channel, command.word, :not_in_dictionary)
     end
 end
 

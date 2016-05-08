@@ -24,7 +24,7 @@ responder_tests = [
 
     ResponderTest(
         "Incorrect solution response to user",
-        IncorrectSolutionResponse(ChannelId("D0"), Word("FOO")),
+        IncorrectSolutionResponse(ChannelId("D0"), Word("FOO"), :not_in_dictionary),
         [TestEvent(ChannelId("D0"), "FOO", "inte")]),
 
     ResponderTest(
@@ -88,7 +88,22 @@ responder_tests = [
     ResponderTest(
         "Help command",
         HelpResponse(ChannelId("C0")),
-        [TestEvent(ChannelId("C0"), "!setnian", "!nian", "!helpnian")])
+        [TestEvent(ChannelId("C0"), "!setnian", "!nian", "!helpnian")]),
+
+    ResponderTest(
+        "Incorrect solution, because it's not nine characters",
+        IncorrectSolutionResponse(ChannelId("D0"), Word("FOO"), :not_nine_characters),
+        [TestEvent(ChannelId("D0"), "FOO", "inte nio tecken")]),
+
+    ResponderTest(
+        "Incorrect solution, because it doesn't match todays puzzle",
+        IncorrectSolutionResponse(ChannelId("D0"), Word("FOO"), :not_correct_characters),
+        [TestEvent(ChannelId("D0"), "FOO", "matchar inte")]),
+
+    ResponderTest(
+        "Incorrect solution, for unknown reason",
+        IncorrectSolutionResponse(ChannelId("D0"), Word("FOO"), :other_reason),
+        [TestEvent(ChannelId("D0"), "FOO", "oklara skäl")]),
 ]
 
 type FakeRTMClient <: AbstractRTMClient

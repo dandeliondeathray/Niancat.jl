@@ -131,6 +131,7 @@ facts("Niancat logic") do
         words = FakeWordDictionary(true, 1)
         word = Word("GALL-TJU TA")
         logic = Logic(words, member_scroll)
+        logic.puzzle = Nullable{Puzzle}(Puzzle("AGALLTJUT"))
         expected_hash = utf8("d8e7363cdad6303dd4c41cb2ad3e2c35759257ca8ac509107e4e9e9ff5741933")
         command = CheckSolutionCommand(channel_id0, user_id0, word)
 
@@ -143,19 +144,53 @@ facts("Niancat logic") do
         @fact notification_response --> SolutionNotificationResponse(SlackName(name), expected_hash)
     end
 
-    context("Incorrect solution") do
+    context("Incorrect solution, because it's not in the dictionary") do
+        member_scroll = FakeMemberScroll()
+        words = FakeWordDictionary(false, 1)
+        logic = Logic(words, member_scroll)
+        logic.puzzle = Nullable{Puzzle}(Puzzle("AGALLTJUT"))
+        word = Word("GALLTJUTA")
+        command = CheckSolutionCommand(channel_id0, user_id0, word)
+        @fact handle(logic, command) -->
+            IncorrectSolutionResponse(channel_id0, word, :not_in_dictionary)
+    end
+
+    context("Incorrect solution, because it's not not nine characters") do
+        member_scroll = FakeMemberScroll()
+        words = FakeWordDictionary(false, 1)
+        logic = Logic(words, member_scroll)
+        logic.puzzle = Nullable{Puzzle}(Puzzle("GALLTJUTA"))
+        word = Word("GALLA")
+        command = CheckSolutionCommand(channel_id0, user_id0, word)
+        @fact handle(logic, command) -->
+            IncorrectSolutionResponse(channel_id0, word, :not_nine_characters)
+    end
+
+        context("Incorrect solution, because it doesn't match the puzzle") do
+        member_scroll = FakeMemberScroll()
+        words = FakeWordDictionary(false, 1)
+        logic = Logic(words, member_scroll)
+        logic.puzzle = Nullable{Puzzle}(Puzzle("ABCDEFGHI"))
+        word = Word("GALLTJUTA")
+        command = CheckSolutionCommand(channel_id0, user_id0, word)
+        @fact handle(logic, command) -->
+            IncorrectSolutionResponse(channel_id0, word, :not_correct_characters)
+    end
+
+    context("Incorrect solution, because the puzzle isn't set") do
         member_scroll = FakeMemberScroll()
         words = FakeWordDictionary(false, 1)
         logic = Logic(words, member_scroll)
         word = Word("GALLTJUTA")
         command = CheckSolutionCommand(channel_id0, user_id0, word)
-        @fact handle(logic, command) --> IncorrectSolutionResponse(channel_id0, word)
+        @fact handle(logic, command) --> NoPuzzleSetResponse(channel_id0)
     end
 
     context("Unknown user") do
         member_scroll = FakeMemberScroll()
         words = FakeWordDictionary(true, 1)
         logic = Logic(words, member_scroll)
+        logic.puzzle = Nullable{Puzzle}(Puzzle("AGALLTJUT"))
         word = Word("GALLTJUTA")
         command = CheckSolutionCommand(channel_id0, user_id0, word)
         response = handle(logic, command)
