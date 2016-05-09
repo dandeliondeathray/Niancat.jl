@@ -6,8 +6,11 @@ profile = DandelionSlack.Profile(Nullable(), Nullable(), SlackName("Real name"),
 
 # A helper function to create a Slack User object.
 u(userId::AbstractString, name::AbstractString) =
-    User(UserId(utf8(userId)), SlackName(utf8(name)), false, "", profile, false, false, false,
-         false, false, Nullable(), Nullable(), Nullable())
+    User(UserId(utf8(userId)), SlackName(utf8(name)),
+         false,  Nullable{UTF8String}(utf8("")),  profile, Nullable{Bool}(false),
+         Nullable{Bool}(false), Nullable{Bool}(false),
+         Nullable{Bool}(false), Nullable{Bool}(false),
+         Nullable(), Nullable(), Nullable())
 
 c(channelId::AbstractString, name::AbstractString) =
     SlackChannel(ChannelId(utf8(channelId)), SlackName(utf8(name)), true, 1, "", false, false,

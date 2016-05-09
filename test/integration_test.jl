@@ -76,4 +76,20 @@ facts("Integration") do
         msg = take_message!(rtm_client)
         @fact msg.channel --> ChannelId("C0")
     end
+
+    context("Error callbacks") do
+        members = FakeMemberScroll()
+        rtm_client = FakeRTMClient()
+        words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
+        token = Token("sometoken")
+
+        handler = NiancatHandler(members, words, ChannelId("C0"), token)
+
+        on_create(handler, rtm_client)
+        add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
+        on_event(handler, HelloEvent())
+
+        # Set the puzzle
+        on_error(handler, DeserializationError(utf8("text"), "{}", MessageEvent))
+    end
 end

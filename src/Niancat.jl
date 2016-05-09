@@ -57,7 +57,7 @@ function on_event(h::NiancatHandler, ::HelloEvent)
 end
 
 # Catch all other events we don't care about.
-on_error(h::NiancatHandler, reason::Symbol, text::UTF8String) = nothing
+on_error(h::NiancatHandler, e::EventError) = println("on_error: $e")
 on_reply(h::NiancatHandler, id::Int64, event::Event) = nothing
 on_event(h::NiancatHandler, event::Event) = nothing
 
