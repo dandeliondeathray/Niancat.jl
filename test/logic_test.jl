@@ -1,6 +1,6 @@
 import Base.==
 
-import Niancat: is_solution, no_of_solutions, handle
+import Niancat: is_solution, no_of_solutions, handle, non_match
 
 #
 # Test data
@@ -18,6 +18,13 @@ hash_tests = [
     ("ÅÄÖABCDEF", "cadaker",  "0d7d353ab20469b1c4bf8446d7297860022bbc19c6ae771f351ae597bf56e0dd"),
     ("ÅÄÖABCDEF", "johaper",  "9280130c1ee9109b63810d5cfdcb456fba8fd5d742b578f60e947c24ba5a6c4f"),
     ("ÅÄÖABCDEF", "andrnils", "8027afb1b362daa27be64edf1806d50a344082d3a534cfc38c827a7e71bc8779")
+]
+
+non_matching_tests = [
+    (Puzzle("GALLTJUTA"), Word("GALLTJUTR"), utf8("R"), utf8("A")),
+    (Puzzle("GALLTJUTA"), Word("GALRTJUTA"), utf8("R"), utf8("L")),
+    (Puzzle("GALLTJUTA"), Word("GBLLTJUTC"), utf8("BC"), utf8("AA")),
+    (Puzzle("ABCDEFÅÄÖ"), Word("ABCDEFÅÄÄ"), utf8("Ä"), utf8("Ö"))
 ]
 
 user_id0    = UserId("U0")
@@ -76,6 +83,12 @@ facts("Niancat logic") do
     context("Solution hash") do
         for (word, nick, expected) in hash_tests
             @fact Niancat.solution_hash(utf8(word), utf8(nick)) --> expected
+        end
+    end
+
+    context("Non-matching help") do
+        for (puzzle, word, too_many, too_few) in non_matching_tests
+            @fact non_match(puzzle, word) --> (too_many, too_few)
         end
     end
 
@@ -166,15 +179,17 @@ facts("Niancat logic") do
             IncorrectSolutionResponse(channel_id0, word, :not_nine_characters)
     end
 
-        context("Incorrect solution, because it doesn't match the puzzle") do
+    context("Incorrect solution, because it doesn't match the puzzle") do
         member_scroll = FakeMemberScroll()
         words = FakeWordDictionary(false, 1)
         logic = Logic(words, member_scroll)
-        logic.puzzle = Nullable{Puzzle}(Puzzle("ABCDEFGHI"))
+        puzzle = Puzzle("ABCDEFGHI")
+        logic.puzzle = Nullable{Puzzle}(puzzle)
         word = Word("GALLTJUTA")
         command = CheckSolutionCommand(channel_id0, user_id0, word)
         @fact handle(logic, command) -->
-            IncorrectSolutionResponse(channel_id0, word, :not_correct_characters)
+            NonMatchingWordResponse(channel_id0, word, puzzle,
+                utf8("AJLLTTU"), utf8("BCDEFHI"))
     end
 
     context("Incorrect solution, because the puzzle isn't set") do

@@ -7,7 +7,7 @@ export Puzzle, Word,
        IncorrectSolutionResponse, CorrectSolutionResponse, SolutionNotificationResponse,
        GetPuzzleResponse, NoPuzzleSetResponse, SetPuzzleResponse, InvalidPuzzleResponse,
        CompositeResponse, UnknownUserSolutionResponse, IgnoredEventCommand, IgnoredEventResponse,
-       InvalidCommandResponse, HelpResponse
+       InvalidCommandResponse, HelpResponse, NonMatchingWordResponse
 
 #
 # Helper types
@@ -119,6 +119,14 @@ end
 
 immutable HelpResponse <: AbstractResponse
     channel::ChannelId
+end
+
+immutable NonMatchingWordResponse <: AbstractResponse
+    channel::ChannelId
+    word::Word
+    puzzle::Puzzle
+    too_many::UTF8String
+    too_few::UTF8String
 end
 
 immutable CompositeResponse <: AbstractResponse

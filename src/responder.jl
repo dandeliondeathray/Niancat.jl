@@ -61,13 +61,25 @@ function respond(r::Responder, response::IncorrectSolutionResponse)
         text = "Ordet $(response.word) finns inte med i SAOL."
     elseif response.reason == :not_nine_characters
         text = "Ordet $(response.word) är inte nio tecken långt."
-    elseif response.reason == :not_correct_characters
-        text = "Ordet $(response.word) matchar inte dagens nian."
     else
         text = "Ordet $(response.word) är inkorrekt, men av oklara skäl."
     end
 
     send(r, response.channel, utf8(text))
+end
+
+function respond(r::Responder, response::NonMatchingWordResponse)
+    text = utf8("Ordet $(response.word) matchar inte dagens nia $(response.puzzle).")
+
+    if response.too_many != utf8("")
+        text = text * utf8(" För många $(response.too_many).")
+    end
+
+    if response.too_few != ""
+        text = text * utf8(" För få $(response.too_few).")
+    end
+
+    send(r, response.channel, text)
 end
 
 function respond(r::Responder, response::GetPuzzleResponse)

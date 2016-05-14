@@ -9,6 +9,36 @@ end
 
 matches(puzzle::Puzzle, word::Word) = sort_and_normalize(puzzle.v) == sort_and_normalize(word.v)
 
+function string_to_dict{T}(s::T)
+    d = Dict{Char, Int}()
+    for c in s
+        d[c] = get(d, c, 0) + 1
+    end
+    d
+end
+
+# Given a puzzle, and a word that doesn't match that puzzle, find what characters there are too many
+# of and what characters there are too few of.
+function non_match(p::Puzzle, w::Word)
+    puzzle_dict = string_to_dict(p.v)
+    word_dict = string_to_dict(w.v)
+
+    too_many = ""
+    too_few = ""
+
+    for w in Set{Char}([collect(w); collect(p)])
+        wn = get(word_dict, w, 0)
+        pn = get(puzzle_dict, w, 0)
+
+        if wn < pn
+            too_few = too_few * utf8(repeat("$w", pn - wn))
+        elseif wn > pn
+            too_many = too_many * utf8(repeat("$w", wn - pn))
+        end
+    end
+    return (utf8(sort(collect(too_many))), utf8(sort(collect(too_few))))
+end
+
 abstract AbstractLogic
 
 type Logic <: AbstractLogic
@@ -53,7 +83,9 @@ function handle(logic::Logic, command::CheckSolutionCommand)
     end
 
     if !matches(get(logic.puzzle), command.word)
-        return IncorrectSolutionResponse(command.channel, command.word, :not_correct_characters)
+        (too_many, too_few) = non_match(get(logic.puzzle), command.word)
+        return NonMatchingWordResponse(command.channel, command.word, get(logic.puzzle),
+            too_many, too_few)
     end
 
     if is_solution(logic.words, command.word)

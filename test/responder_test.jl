@@ -97,8 +97,23 @@ responder_tests = [
 
     ResponderTest(
         "Incorrect solution, because it doesn't match todays puzzle",
-        IncorrectSolutionResponse(ChannelId("D0"), Word("FOO"), :not_correct_characters),
-        [TestEvent(ChannelId("D0"), "FOO", "matchar inte")]),
+        NonMatchingWordResponse(
+            ChannelId("D0"), Word("FOO"), Puzzle("BAR"), utf8("ABC"), utf8("DEF")),
+        [TestEvent(ChannelId("D0"), "FOO", "BAR", "matchar inte", "många ABC", "få DEF")]),
+
+    ResponderTest(
+        "Incorrect solution, because it doesn't match todays puzzle",
+        NonMatchingWordResponse(
+            ChannelId("D0"), Word("FOO"), Puzzle("BAR"), utf8("ABC"), utf8("")),
+        [TestEvent(ChannelId("D0"), "FOO", "matchar inte", "många ABC";
+            has_not=["få"])]),
+
+    ResponderTest(
+        "Incorrect solution, because it doesn't match todays puzzle",
+        NonMatchingWordResponse(
+            ChannelId("D0"), Word("FOO"), Puzzle("BAR"), utf8(""), utf8("DEF")),
+        [TestEvent(ChannelId("D0"), "FOO", "matchar inte", "få DEF";
+            has_not=["många"])]),
 
     ResponderTest(
         "Incorrect solution, for unknown reason",
