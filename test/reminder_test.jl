@@ -41,6 +41,17 @@ reminders_tests = [
         response         = ReminderNotificationResponse(Dict{UserId, ReminderEntry}(
                                UserId("U0") =>
                                     ReminderEntry(ChannelId("D0"), [utf8("A reminder")])))),
+
+    RemindersTest(
+        description      = "Get a reminder in public when no reminders were set",
+        command          = GetRemindersCommand(ChannelId("C0"), UserId("U0")),
+        response         = GetRemindersResponse(ChannelId("C0"), [])),
+
+    RemindersTest(
+        description      = "Get a reminder in public leads to private response",
+        initial_commands = [SetReminderCommand(ChannelId("D0"), UserId("U0"), utf8("A reminder"))],
+        command          = GetRemindersCommand(ChannelId("C0"), UserId("U0")),
+        response         = GetRemindersResponse(ChannelId("D0"), [utf8("A reminder")])),
 ]
 
 facts("Reminders") do

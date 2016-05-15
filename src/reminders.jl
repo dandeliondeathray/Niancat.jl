@@ -22,9 +22,13 @@ end
 function reminder(r::Reminders, command::GetRemindersCommand)
     texts = []
     if haskey(r.entries, command.user)
-        texts = r.entries[command.user].texts
+        # When there are reminders, list them in the private channel specified in the entry.
+        entry = r.entries[command.user]
+        return GetRemindersResponse(entry.channel, entry.texts)
     end
 
+    # When there are no reminders, list them in then channel the command came from, even if that is
+    # a public channel. Since there are no reminders, there's nothing to spoil.
     GetRemindersResponse(command.channel, texts)
 end
 
