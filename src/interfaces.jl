@@ -1,4 +1,4 @@
-export AbstractMembers, AbstractWordDictionary, AbstractLogic,
+export AbstractMembers, AbstractWordDictionary, AbstractLogic, AbstractReminders,
        find_name, is_solution, no_of_solutions, handle
 
 abstract AbstractMembers

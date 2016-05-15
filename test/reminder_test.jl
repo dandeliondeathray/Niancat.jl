@@ -1,7 +1,3 @@
-import Niancat: ReminderEntry
-
-==(a::ReminderEntry, b::ReminderEntry) = a.channel == b.channel && a.texts == b.texts
-
 immutable RemindersTest
     description::UTF8String
     initial_commands::Vector{AbstractCommand}

@@ -1,4 +1,4 @@
-import Niancat: find_name, retrieve_user_list, add
+import Niancat: find_name, retrieve_user_list, add, ReminderEntry
 import DandelionSlack: User
 
 type FakeMemberScroll <: AbstractMembers
@@ -23,3 +23,6 @@ retrieve_user_list(s::FakeMemberScroll, token::Token) = s.retrieve_calls += 1
 
 add(s::FakeMemberScroll, u::User) = s.users[u.id] = u.name
 add(s::FakeMemberScroll, us...) = for u in us add(s, u) end
+
+
+==(a::ReminderEntry, b::ReminderEntry) = a.channel == b.channel && a.texts == b.texts

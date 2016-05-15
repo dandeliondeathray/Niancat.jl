@@ -9,7 +9,7 @@ export Puzzle, Word,
        CompositeResponse, UnknownUserSolutionResponse, IgnoredEventCommand, IgnoredEventResponse,
        InvalidCommandResponse, HelpResponse, NonMatchingWordResponse,
        SetReminderCommand, GetRemindersCommand, SetReminderResponse, GetRemindersResponse,
-       ReminderNotificationResponse, ReminderList
+       ReminderNotificationResponse, ReminderList, AbstractReminderCommand
 
 #
 # Helper types
@@ -72,13 +72,14 @@ immutable InvalidCommand <: AbstractCommand
     reason::Symbol
 end
 
-immutable SetReminderCommand <: AbstractCommand
+abstract AbstractReminderCommand <: AbstractCommand
+immutable SetReminderCommand <: AbstractReminderCommand
     channel::ChannelId
     user::UserId
     text::UTF8String
 end
 
-immutable GetRemindersCommand <: AbstractCommand
+immutable GetRemindersCommand <: AbstractReminderCommand
     channel::ChannelId
     user::UserId
 end

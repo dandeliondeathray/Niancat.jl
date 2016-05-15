@@ -8,12 +8,12 @@ import DandelionSlack: RTMHandler, on_reply, on_event, on_error
 include("types.jl")
 include("interfaces.jl")
 include("dictionary.jl")
+include("reminders.jl")
 include("logic.jl")
 include("members.jl")
 include("responder.jl")
 include("command_parser.jl")
 include("word_filter.jl")
-include("reminders.jl")
 
 #
 # NiancatHandler is the main type of this entire bot. It integrates the command parser, logic, and

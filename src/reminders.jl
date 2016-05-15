@@ -1,7 +1,5 @@
 export Reminders, reminder, reminder_notification
 
-
-
 type Reminders <: AbstractReminders
     entries::Dict{UserId, ReminderEntry}
 
