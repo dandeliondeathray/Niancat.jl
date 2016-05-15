@@ -7,7 +7,9 @@ export Puzzle, Word,
        IncorrectSolutionResponse, CorrectSolutionResponse, SolutionNotificationResponse,
        GetPuzzleResponse, NoPuzzleSetResponse, SetPuzzleResponse, InvalidPuzzleResponse,
        CompositeResponse, UnknownUserSolutionResponse, IgnoredEventCommand, IgnoredEventResponse,
-       InvalidCommandResponse, HelpResponse, NonMatchingWordResponse
+       InvalidCommandResponse, HelpResponse, NonMatchingWordResponse,
+       SetReminderCommand, GetRemindersCommand, SetReminderResponse, GetRemindersResponse,
+       ReminderNotificationResponse, ReminderList
 
 #
 # Helper types
@@ -18,6 +20,16 @@ export Puzzle, Word,
 
 @newimmutable Word <: UTF8String
 @stringinterface Word
+
+typealias ReminderList Vector{UTF8String}
+
+type ReminderEntry
+    channel::ChannelId
+    texts::ReminderList
+
+    ReminderEntry(channel::ChannelId) = new(channel, [])
+    ReminderEntry(channel::ChannelId, texts::ReminderList) = new(channel, texts)
+end
 
 #
 # Commands
@@ -58,6 +70,17 @@ immutable InvalidCommand <: AbstractCommand
     user::UserId
     text::UTF8String
     reason::Symbol
+end
+
+immutable SetReminderCommand <: AbstractCommand
+    channel::ChannelId
+    user::UserId
+    text::UTF8String
+end
+
+immutable GetRemindersCommand <: AbstractCommand
+    channel::ChannelId
+    user::UserId
 end
 
 #
@@ -127,6 +150,20 @@ immutable NonMatchingWordResponse <: AbstractResponse
     puzzle::Puzzle
     too_many::UTF8String
     too_few::UTF8String
+end
+
+immutable SetReminderResponse <: AbstractResponse
+    channelId::ChannelId
+    text::UTF8String
+end
+
+immutable GetRemindersResponse <: AbstractResponse
+    channelId::ChannelId
+    texts::ReminderList
+end
+
+immutable ReminderNotificationResponse <: AbstractResponse
+    entries::Dict{UserId, ReminderEntry}
 end
 
 immutable CompositeResponse <: AbstractResponse

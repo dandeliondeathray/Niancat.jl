@@ -2,6 +2,7 @@ export AbstractMembers, AbstractWordDictionary, AbstractLogic,
        find_name, is_solution, no_of_solutions, handle
 
 abstract AbstractMembers
+abstract AbstractReminders
 
 find_name(t::AbstractMembers, ::UserId) =
     error("find_name not implemented for $(t) and UserId")
