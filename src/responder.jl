@@ -38,6 +38,8 @@ riktiga lösningen.
 Kommandon:
     !setnian <pussel>   Sätt nian.
     !nian               Visa nian.
+    !reminder <text>    Sätt en påminnelse, att visas när nästa nian sätts.
+    !reminders          Visa alla mina påminnelser.
     !helpnian           Visa denna hjälptext.
 
 Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till tiancat.

@@ -84,6 +84,37 @@ command_parser_tests = [
         "Help with too many parameters",
         "!helpnian yoyoyo", test_channel,
         InvalidCommand(test_channel, test_user, "!helpnian yoyoyo", :wrong_no_of_parameters)),
+
+    CommandParserTest(
+        "Set reminder command",
+        "!reminder FOO BAR BAZ qux", im_channel,
+        SetReminderCommand(im_channel, test_user, "FOO BAR BAZ qux")),
+
+    CommandParserTest(
+        "Set reminder command with no params",
+        "!reminder   ", im_channel,
+        InvalidCommand(im_channel, test_user, "!reminder   ", :wrong_no_of_parameters)),
+
+    CommandParserTest(
+        "Set reminder command ignored in public channel",
+        "!reminder FOO BAR BAZ qux", test_channel,
+        IgnoredEventCommand(test_channel, test_user, "!reminder FOO BAR BAZ qux")),
+
+    CommandParserTest(
+        "Get reminders",
+        "!reminders", im_channel,
+        GetRemindersCommand(im_channel, test_user)),
+
+    CommandParserTest(
+        "Get reminders is also accepted in public (but response is in private)",
+        "!reminders", test_channel,
+        GetRemindersCommand(test_channel, test_user)),
+
+    CommandParserTest(
+        "Get reminders too many params",
+        "!reminders COOL COOL COOL", im_channel,
+        InvalidCommand(im_channel, test_user, "!reminders COOL COOL COOL",
+                       :wrong_no_of_parameters)),
 ]
 
 facts("CommandParser") do
