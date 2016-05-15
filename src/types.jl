@@ -154,17 +154,17 @@ immutable NonMatchingWordResponse <: AbstractResponse
 end
 
 immutable SetReminderResponse <: AbstractResponse
-    channelId::ChannelId
+    channel::ChannelId
     text::UTF8String
 end
 
 immutable GetRemindersResponse <: AbstractResponse
-    channelId::ChannelId
+    channel::ChannelId
     texts::ReminderList
 end
 
 immutable ReminderNotificationResponse <: AbstractResponse
-    entries::Dict{UserId, ReminderEntry}
+    entries::Dict{UserId, ReminderList}
 end
 
 immutable CompositeResponse <: AbstractResponse

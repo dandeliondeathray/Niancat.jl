@@ -1,5 +1,6 @@
 import Niancat: find_name, retrieve_user_list, add, ReminderEntry
 import DandelionSlack: User
+import Base: ==
 
 type FakeMemberScroll <: AbstractMembers
     users::Dict{UserId, SlackName}

@@ -119,6 +119,23 @@ responder_tests = [
         "Incorrect solution, for unknown reason",
         IncorrectSolutionResponse(ChannelId("D0"), Word("FOO"), :other_reason),
         [TestEvent(ChannelId("D0"), "FOO", "oklara skäl")]),
+
+    ResponderTest(
+        "Set a reminder",
+        SetReminderResponse(ChannelId("D0"), utf8("Hello")),
+        [TestEvent(ChannelId("D0"), "Hello", "Påminnelse")]),
+
+    ResponderTest(
+        "Get a reminder",
+        GetRemindersResponse(ChannelId("D0"), [utf8("Hello"), utf8("world")]),
+        [TestEvent(ChannelId("D0"), "Hello", "world")]),
+
+    ResponderTest(
+        "Notification response",
+        ReminderNotificationResponse(Dict{UserId, ReminderList}(
+            UserId("U0") => [utf8("FOO")],
+            UserId("U1") => [utf8("BAR"), utf8("BAZ")])),
+        [TestEvent(main_channel_id, "<@U0>", "FOO", "<@U1>", "BAR", "BAZ")])
 ]
 
 type FakeRTMClient <: AbstractRTMClient

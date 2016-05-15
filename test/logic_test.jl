@@ -265,9 +265,8 @@ facts("Niancat logic") do
     context("Reminder notification is done on next set") do
         words = FakeWordDictionary(true, 1)
 
-        reminder_entry = ReminderEntry(ChannelId("D0"), [utf8("A reminder")])
-        notification_response = ReminderNotificationResponse(Dict{UserId, ReminderEntry}(
-            UserId("U0") => reminder_entry))
+        notification_response = ReminderNotificationResponse(Dict{UserId, ReminderList}(
+            UserId("U0") => [utf8("Hello")]))
 
         logic = Logic(Nullable{Puzzle}(), words, fake_members,
                       FakeReminders(notification_response), 1)

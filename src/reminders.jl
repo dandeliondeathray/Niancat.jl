@@ -32,7 +32,10 @@ end
 
 
 function reminder_notification(r::Reminders)
-    response = ReminderNotificationResponse(copy(r.entries))
+    user_reminders = Dict{UserId, ReminderList}([
+        u => entry.texts
+        for (u, entry) in r.entries
+    ])
     empty!(r.entries)
-    response
+    ReminderNotificationResponse(user_reminders)
 end

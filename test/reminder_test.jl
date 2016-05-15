@@ -34,9 +34,8 @@ reminders_tests = [
         description      = "Notify public channel about one reminder",
         initial_commands = [SetReminderCommand(ChannelId("D0"), UserId("U0"), utf8("A reminder"))],
         fun              = reminder_notification,
-        response         = ReminderNotificationResponse(Dict{UserId, ReminderEntry}(
-                               UserId("U0") =>
-                                    ReminderEntry(ChannelId("D0"), [utf8("A reminder")])))),
+        response         = ReminderNotificationResponse(Dict{UserId, ReminderList}(
+                               UserId("U0") => [utf8("A reminder")]))),
 
     RemindersTest(
         description      = "Get a reminder in public when no reminders were set",
@@ -74,10 +73,9 @@ facts("Reminders") do
         reminder(reminders, SetReminderCommand(ChannelId("D0"), UserId("U0"), utf8("A reminder")))
 
         @fact reminder_notification(reminders) --> ReminderNotificationResponse(
-            Dict{UserId, ReminderEntry}(
-                UserId("U0") => ReminderEntry(ChannelId("D0"), [utf8("A reminder")])))
+            Dict{UserId, ReminderList}(UserId("U0") => [utf8("A reminder")]))
 
         @fact reminder_notification(reminders) --> ReminderNotificationResponse(
-            Dict{UserId, ReminderEntry}())
+            Dict{UserId, ReminderList}())
     end
 end

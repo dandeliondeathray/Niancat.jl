@@ -39,16 +39,19 @@ Kommandon:
     !setnian <pussel>   Sätt nian.
     !nian               Visa nian.
     !reminder <text>    Sätt en påminnelse, att visas när nästa nian sätts.
-    !reminders          Visa alla mina påminnelser.
+    !reminders          Visa alla mina påminnelser. Svar, om det finns, visas i en privat kanal.
     !helpnian           Visa denna hjälptext.
 
 Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till tiancat.
 """
 
+quote_delim = "\n> "
 @response CorrectSolutionResponse   utf8("Ordet $(response.word) är korrekt!")
 @response NoPuzzleSetResponse utf8("Dagens nia är inte satt!")
 @response InvalidPuzzleResponse utf8("$(response.puzzle) är inte giltig!")
 @response HelpResponse utf8(help_text)
+@response SetReminderResponse utf8("Påminnelse satt för '$(response.text)'")
+@response GetRemindersResponse utf8("Påminnelser:\n> $(join(response.texts, quote_delim))")
 
 respond(r::Responder, response::SolutionNotificationResponse) =
     send(r, r.main_channel, utf8("$(response.name) löste nian: $(response.hash)"))
@@ -120,4 +123,14 @@ function respond(r::Responder, response::InvalidCommandResponse)
     else
         send(r, response.channel, utf8("Fel: $(response.reason)"))
     end
+end
+
+function respond(r::Responder, response::ReminderNotificationResponse)
+    header = [utf8("*Påminnelser*")]
+    reminders = [
+        utf8("<@$(user)>\n> $(join(reminders, quote_delim))")
+        for (user, reminders) in response.entries
+    ]
+
+    send(r, r.main_channel, join([header; reminders]))
 end
