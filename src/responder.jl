@@ -50,8 +50,7 @@ quote_delim = "\n> "
 @response NoPuzzleSetResponse utf8("Dagens nia är inte satt!")
 @response InvalidPuzzleResponse utf8("$(response.puzzle) är inte giltig!")
 @response HelpResponse utf8(help_text)
-@response SetReminderResponse utf8("Påminnelse satt för '$(response.text)'")
-@response GetRemindersResponse utf8("Påminnelser:\n> $(join(response.texts, quote_delim))")
+@response SetReminderResponse utf8("Påminnelse satt: $(response.text)")
 
 respond(r::Responder, response::SolutionNotificationResponse) =
     send(r, r.main_channel, utf8("$(response.name) löste nian: $(response.hash)"))
@@ -126,11 +125,21 @@ function respond(r::Responder, response::InvalidCommandResponse)
 end
 
 function respond(r::Responder, response::ReminderNotificationResponse)
-    header = [utf8("*Påminnelser*")]
+    header = [utf8("*Påminnelser*\n")]
     reminders = [
         utf8("<@$(user)>\n> $(join(reminders, quote_delim))")
         for (user, reminders) in response.entries
     ]
 
     send(r, r.main_channel, join([header; reminders]))
+end
+
+#@response GetRemindersResponse utf8("Påminnelser:\n> $(join(response.texts, quote_delim))")
+function respond(r::Responder, response::GetRemindersResponse)
+    text = utf8("Inga påminnelser.")
+    if !isempty(response.texts)
+        text = utf8("Påminnelser:\n> $(join(response.texts, quote_delim))")
+    end
+
+    send(r, response.channel, text)
 end
