@@ -25,7 +25,7 @@ end
 help_text = """
 "Dagens nia" är ett ordpussel från Svenska Dagbladet. Varje dag får man nio bokstäver, och ska hitta
 vilket svenskt ord man kan konstruera med hjälp av dessa bokstäver.
-Boten 'tiancat' hjälper dig att lösa nian genom att kontrollera om ord finns med i SAOL eller inte,
+Boten 'niancat' hjälper dig att lösa nian genom att kontrollera om ord finns med i SAOL eller inte,
 och att bokstäverna matchar dagens nia. Om du skriver in ett lösningsförslag i ett privat-meddelande
 till boten så kommer den säga till om ordet är korrekt, och i sådana fall automatiskt notifiera
 kanalen om att du hittat en lösning.
@@ -38,8 +38,8 @@ riktiga lösningen.
 Kommandon:
     !setnian <pussel>   Sätt nian.
     !nian               Visa nian.
-    !reminder <text>    Sätt en påminnelse, att visas när nästa nian sätts.
-    !reminders          Visa alla mina påminnelser. Svar, om det finns, visas i en privat kanal.
+    !reminder <text>    Sätt en olösning, att visas när nästa nian sätts.
+    !reminders          Visa alla mina olösning. Svar, om det finns, visas i en privat kanal.
     !helpnian           Visa denna hjälptext.
 
 Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till tiancat.
@@ -50,7 +50,7 @@ quote_delim = "\n> "
 @response NoPuzzleSetResponse utf8("Dagens nia är inte satt!")
 @response InvalidPuzzleResponse utf8("$(response.puzzle) är inte giltig!")
 @response HelpResponse utf8(help_text)
-@response SetReminderResponse utf8("Påminnelse satt: $(response.text)")
+@response SetReminderResponse utf8("Olösning satt: $(response.text)")
 
 respond(r::Responder, response::SolutionNotificationResponse) =
     send(r, r.main_channel, utf8("$(response.name) löste nian: $(response.hash)"))
@@ -125,7 +125,7 @@ function respond(r::Responder, response::InvalidCommandResponse)
 end
 
 function respond(r::Responder, response::ReminderNotificationResponse)
-    header = [utf8("*Påminnelser*\n")]
+    header = [utf8("*Olösningar*\n")]
     reminders = [
         utf8("<@$(user)>\n> $(join(reminders, quote_delim))")
         for (user, reminders) in response.entries
@@ -134,11 +134,10 @@ function respond(r::Responder, response::ReminderNotificationResponse)
     send(r, r.main_channel, join([header; reminders]))
 end
 
-#@response GetRemindersResponse utf8("Påminnelser:\n> $(join(response.texts, quote_delim))")
 function respond(r::Responder, response::GetRemindersResponse)
-    text = utf8("Inga påminnelser.")
+    text = utf8("Inga olösningar sparade.")
     if !isempty(response.texts)
-        text = utf8("Påminnelser:\n> $(join(response.texts, quote_delim))")
+        text = utf8("Olösningar:\n> $(join(response.texts, quote_delim))")
     end
 
     send(r, response.channel, text)

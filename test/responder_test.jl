@@ -123,7 +123,7 @@ responder_tests = [
     ResponderTest(
         "Set a reminder",
         SetReminderResponse(ChannelId("D0"), utf8("Hello")),
-        [TestEvent(ChannelId("D0"), "Hello", "Påminnelse")]),
+        [TestEvent(ChannelId("D0"), "Hello", "Olösning")]),
 
     ResponderTest(
         "Get a reminder",
