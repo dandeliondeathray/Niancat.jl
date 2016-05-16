@@ -45,15 +45,15 @@ type Logic <: AbstractLogic
     puzzle::Nullable{Puzzle}
     words::AbstractWordDictionary
     members::AbstractMembers
-    reminders::AbstractReminders
+    unsolutions::AbstractUnsolutions
     solutions::UInt
 
     Logic(words::AbstractWordDictionary, m::AbstractMembers) =
-        new(Nullable{Puzzle}(), words, m, Reminders(), 0)
+        new(Nullable{Puzzle}(), words, m, Unsolutions(), 0)
     Logic(p::Nullable{Puzzle},
           words::AbstractWordDictionary,
           m::AbstractMembers,
-          r::AbstractReminders,
+          r::AbstractUnsolutions,
           s::Int) = new(Nullable{Puzzle}(p), words, m, r, s)
 end
 
@@ -76,7 +76,7 @@ function handle(logic::Logic, command::SetPuzzleCommand)
     logic.puzzle = command.puzzle
 
     set_puzzle_response = SetPuzzleResponse(command.channel, command.puzzle, logic.solutions)
-    notification_response = reminder_notification(logic.reminders)
+    notification_response = unsolution_notification(logic.unsolutions)
     if isempty(notification_response.entries)
         return set_puzzle_response
     else
@@ -118,7 +118,7 @@ function handle(logic::Logic, command::CheckSolutionCommand)
     end
 end
 
-handle(logic::Logic, c::AbstractReminderCommand) = reminder(logic.reminders, c)
+handle(logic::Logic, c::AbstractUnsolutionCommand) = unsolution(logic.unsolutions, c)
 
 handle(::Logic, command::IgnoredEventCommand) = IgnoredEventResponse(command.channel, command.text)
 handle(::Logic, command::InvalidCommand) = InvalidCommandResponse(command.channel, command.reason)

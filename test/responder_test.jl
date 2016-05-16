@@ -121,18 +121,18 @@ responder_tests = [
         [TestEvent(ChannelId("D0"), "FOO", "oklara skäl")]),
 
     ResponderTest(
-        "Set a reminder",
-        SetReminderResponse(ChannelId("D0"), utf8("Hello")),
+        "Set an unsolution",
+        SetUnsolutionResponse(ChannelId("D0"), utf8("Hello")),
         [TestEvent(ChannelId("D0"), "Hello", "Olösning")]),
 
     ResponderTest(
-        "Get a reminder",
-        GetRemindersResponse(ChannelId("D0"), [utf8("Hello"), utf8("world")]),
+        "Get an unsolution",
+        GetUnsolutionsResponse(ChannelId("D0"), [utf8("Hello"), utf8("world")]),
         [TestEvent(ChannelId("D0"), "Hello", "world")]),
 
     ResponderTest(
         "Notification response",
-        ReminderNotificationResponse(Dict{UserId, ReminderList}(
+        UnsolutionNotificationResponse(Dict{UserId, UnsolutionList}(
             UserId("U0") => [utf8("FOO")],
             UserId("U1") => [utf8("BAR"), utf8("BAZ")])),
         [TestEvent(main_channel_id, "<@U0>", "FOO", "<@U1>", "BAR", "BAZ")])

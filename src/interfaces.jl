@@ -1,8 +1,8 @@
-export AbstractMembers, AbstractWordDictionary, AbstractLogic, AbstractReminders,
+export AbstractMembers, AbstractWordDictionary, AbstractLogic, AbstractUnsolutions,
        find_name, is_solution, no_of_solutions, handle
 
 abstract AbstractMembers
-abstract AbstractReminders
+abstract AbstractUnsolutions
 
 find_name(t::AbstractMembers, ::UserId) =
     error("find_name not implemented for $(t) and UserId")

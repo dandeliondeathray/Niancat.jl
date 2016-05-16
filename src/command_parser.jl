@@ -16,8 +16,8 @@ commands = Dict{UTF8String, CommandParser}(
     "!setnian" => CommandParser(1, SetPuzzleCommand, (x, _) -> [Puzzle(x[1])]),
     "!nian" => CommandParser(GetPuzzleCommand),
     "!helpnian" => CommandParser(HelpCommand),
-    "!reminder" => CommandParser(-2, SetReminderCommand, (_, y) -> [y], is_private=true),
-    "!reminders" => CommandParser(GetRemindersCommand))
+    "!unsolution" => CommandParser(-2, SetUnsolutionCommand, (_, y) -> [y], is_private=true),
+    "!unsolutions" => CommandParser(GetUnsolutionsCommand))
 
 check_command = CommandParser(-1, CheckSolutionCommand, (x, _) -> [Word(join(x))])
 

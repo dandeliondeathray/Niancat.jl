@@ -38,8 +38,8 @@ riktiga lösningen.
 Kommandon:
     !setnian <pussel>   Sätt nian.
     !nian               Visa nian.
-    !reminder <text>    Sätt en olösning, att visas när nästa nian sätts.
-    !reminders          Visa alla mina olösning. Svar, om det finns, visas i en privat kanal.
+    !unsolution <text>  Sätt en olösning, att visas när nästa nian sätts.
+    !unsolutions        Visa alla mina olösning. Svar, om det finns, visas i en privat kanal.
     !helpnian           Visa denna hjälptext.
 
 Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till tiancat.
@@ -50,7 +50,7 @@ quote_delim = "\n> "
 @response NoPuzzleSetResponse utf8("Dagens nia är inte satt!")
 @response InvalidPuzzleResponse utf8("$(response.puzzle) är inte giltig!")
 @response HelpResponse utf8(help_text)
-@response SetReminderResponse utf8("Olösning satt: $(response.text)")
+@response SetUnsolutionResponse utf8("Olösning satt: $(response.text)")
 
 respond(r::Responder, response::SolutionNotificationResponse) =
     send(r, r.main_channel, utf8("$(response.name) löste nian: $(response.hash)"))
@@ -124,17 +124,17 @@ function respond(r::Responder, response::InvalidCommandResponse)
     end
 end
 
-function respond(r::Responder, response::ReminderNotificationResponse)
+function respond(r::Responder, response::UnsolutionNotificationResponse)
     header = [utf8("*Olösningar*\n")]
-    reminders = [
-        utf8("<@$(user)>\n> $(join(reminders, quote_delim))")
-        for (user, reminders) in response.entries
+    unsolutions = [
+        utf8("<@$(user)>\n> $(join(unsolutions, quote_delim))")
+        for (user, unsolutions) in response.entries
     ]
 
-    send(r, r.main_channel, join([header; reminders]))
+    send(r, r.main_channel, join([header; unsolutions]))
 end
 
-function respond(r::Responder, response::GetRemindersResponse)
+function respond(r::Responder, response::GetUnsolutionsResponse)
     text = utf8("Inga olösningar sparade.")
     if !isempty(response.texts)
         text = utf8("Olösningar:\n> $(join(response.texts, quote_delim))")

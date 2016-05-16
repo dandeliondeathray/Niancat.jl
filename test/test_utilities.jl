@@ -1,4 +1,4 @@
-import Niancat: find_name, retrieve_user_list, add, ReminderEntry
+import Niancat: find_name, retrieve_user_list, add, UnsolutionEntry
 import DandelionSlack: User
 import Base: ==
 
@@ -26,4 +26,4 @@ add(s::FakeMemberScroll, u::User) = s.users[u.id] = u.name
 add(s::FakeMemberScroll, us...) = for u in us add(s, u) end
 
 
-==(a::ReminderEntry, b::ReminderEntry) = a.channel == b.channel && a.texts == b.texts
+==(a::UnsolutionEntry, b::UnsolutionEntry) = a.channel == b.channel && a.texts == b.texts

@@ -1,7 +1,7 @@
 import Base.==
 
-import Niancat: is_solution, no_of_solutions, handle, non_match, reminder, reminder_notification,
-                ReminderList
+import Niancat: is_solution, no_of_solutions, handle, non_match, unsolution, unsolution_notification,
+                UnsolutionList
 
 #
 # Test data
@@ -68,18 +68,18 @@ is_solution(f::FakeWordDictionary, w::Word) = f.is_solution_
 no_of_solutions(f::FakeWordDictionary, w::Puzzle) = f.no_of_solutions_
 
 
-type FakeReminders <: AbstractReminders
+type FakeUnsolutions <: AbstractUnsolutions
     response::Nullable{AbstractResponse}
 
-    FakeReminders() = new(Nullable{AbstractResponse}())
-    FakeReminders(c::AbstractResponse) = new(Nullable{AbstractResponse}(c))
+    FakeUnsolutions() = new(Nullable{AbstractResponse}())
+    FakeUnsolutions(c::AbstractResponse) = new(Nullable{AbstractResponse}(c))
 end
 
-reminder(r::FakeReminders, ::AbstractCommand) = get(r.response)
-reminder_notification(r::FakeReminders) = get(r.response)
+unsolution(r::FakeUnsolutions, ::AbstractCommand) = get(r.response)
+unsolution_notification(r::FakeUnsolutions) = get(r.response)
 
-type FakeReminderCommand <: AbstractReminderCommand end
-type FakeReminderResponse <: AbstractResponse end
+type FakeUnsolutionCommand <: AbstractUnsolutionCommand end
+type FakeUnsolutionResponse <: AbstractResponse end
 
 #
 # Tests
@@ -110,7 +110,7 @@ facts("Niancat logic") do
     context("Get puzzle") do
         words = FakeWordDictionary(true, 1)
         command = GetPuzzleCommand(channel_id0, user_id0)
-        logic = Logic(Nullable{Puzzle}(puzzle0), words, fake_members, Reminders(), 1)
+        logic = Logic(Nullable{Puzzle}(puzzle0), words, fake_members, Unsolutions(), 1)
         @fact handle(logic, command) --> GetPuzzleResponse(channel_id0, puzzle0, 1)
     end
 
@@ -135,7 +135,7 @@ facts("Niancat logic") do
 
     context("Set invalid puzzle") do
         words = FakeWordDictionary(true, 0)
-        logic = Logic(Nullable{Puzzle}(puzzle1), words, fake_members, Reminders(), 1)
+        logic = Logic(Nullable{Puzzle}(puzzle1), words, fake_members, Unsolutions(), 1)
         get_command = GetPuzzleCommand(channel_id0, user_id0)
         set_command = SetPuzzleCommand(channel_id0, user_id0, puzzle0)
         @fact handle(logic, set_command) --> InvalidPuzzleResponse(channel_id0, puzzle0)
@@ -255,21 +255,21 @@ facts("Niancat logic") do
         @fact handle(logic, command) --> HelpResponse(channel_id0)
     end
 
-    context("Reminder command is propagated to reminders type") do
+    context("Unsolution command is propagated to unsolutions type") do
         words = FakeWordDictionary(true, 1)
         logic = Logic(Nullable{Puzzle}(puzzle0), words, fake_members,
-            FakeReminders(FakeReminderResponse()), 0)
-        @fact handle(logic, FakeReminderCommand()) --> FakeReminderResponse()
+            FakeUnsolutions(FakeUnsolutionResponse()), 0)
+        @fact handle(logic, FakeUnsolutionCommand()) --> FakeUnsolutionResponse()
     end
 
-    context("Reminder notification is done on next set") do
+    context("Unsolution notification is done on next set") do
         words = FakeWordDictionary(true, 1)
 
-        notification_response = ReminderNotificationResponse(Dict{UserId, ReminderList}(
+        notification_response = UnsolutionNotificationResponse(Dict{UserId, UnsolutionList}(
             UserId("U0") => [utf8("Hello")]))
 
         logic = Logic(Nullable{Puzzle}(), words, fake_members,
-                      FakeReminders(notification_response), 1)
+                      FakeUnsolutions(notification_response), 1)
         set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
 
 
@@ -280,12 +280,12 @@ facts("Niancat logic") do
         @fact handle(logic, set_command) --> expected
     end
 
-    context("Reminder notification is not done on invalid set") do
+    context("Unsolution notification is not done on invalid set") do
         words = FakeWordDictionary(true, 0)
 
-        # An empty FakeReminders causes it to throw an exception when called.
-        # Therefore, if reminder_notification is called, then this test will fail.
-        logic = Logic(Nullable{Puzzle}(), words, fake_members, FakeReminders(), 0)
+        # An empty FakeUnsolutions causes it to throw an exception when called.
+        # Therefore, if unsolution_notification is called, then this test will fail.
+        logic = Logic(Nullable{Puzzle}(), words, fake_members, FakeUnsolutions(), 0)
         set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
 
         handle(logic, set_command)

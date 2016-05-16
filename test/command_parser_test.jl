@@ -86,34 +86,34 @@ command_parser_tests = [
         InvalidCommand(test_channel, test_user, "!helpnian yoyoyo", :wrong_no_of_parameters)),
 
     CommandParserTest(
-        "Set reminder command",
-        "!reminder FOO BAR BAZ qux", im_channel,
-        SetReminderCommand(im_channel, test_user, "FOO BAR BAZ qux")),
+        "Set unsolution command",
+        "!unsolution FOO BAR BAZ qux", im_channel,
+        SetUnsolutionCommand(im_channel, test_user, "FOO BAR BAZ qux")),
 
     CommandParserTest(
-        "Set reminder command with no params",
-        "!reminder   ", im_channel,
-        InvalidCommand(im_channel, test_user, "!reminder   ", :wrong_no_of_parameters)),
+        "Set unsolution command with no params",
+        "!unsolution   ", im_channel,
+        InvalidCommand(im_channel, test_user, "!unsolution   ", :wrong_no_of_parameters)),
 
     CommandParserTest(
-        "Set reminder command ignored in public channel",
-        "!reminder FOO BAR BAZ qux", test_channel,
-        IgnoredEventCommand(test_channel, test_user, "!reminder FOO BAR BAZ qux")),
+        "Set unsolution command ignored in public channel",
+        "!unsolution FOO BAR BAZ qux", test_channel,
+        IgnoredEventCommand(test_channel, test_user, "!unsolution FOO BAR BAZ qux")),
 
     CommandParserTest(
-        "Get reminders",
-        "!reminders", im_channel,
-        GetRemindersCommand(im_channel, test_user)),
+        "Get unsolutions",
+        "!unsolutions", im_channel,
+        GetUnsolutionsCommand(im_channel, test_user)),
 
     CommandParserTest(
-        "Get reminders is also accepted in public (but response is in private)",
-        "!reminders", test_channel,
-        GetRemindersCommand(test_channel, test_user)),
+        "Get unsolutions is also accepted in public (but response is in private)",
+        "!unsolutions", test_channel,
+        GetUnsolutionsCommand(test_channel, test_user)),
 
     CommandParserTest(
-        "Get reminders too many params",
-        "!reminders COOL COOL COOL", im_channel,
-        InvalidCommand(im_channel, test_user, "!reminders COOL COOL COOL",
+        "Get unsolutions, too many params",
+        "!unsolutions COOL COOL COOL", im_channel,
+        InvalidCommand(im_channel, test_user, "!unsolutions COOL COOL COOL",
                        :wrong_no_of_parameters)),
 ]
 

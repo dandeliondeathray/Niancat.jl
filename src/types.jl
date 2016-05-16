@@ -8,8 +8,8 @@ export Puzzle, Word,
        GetPuzzleResponse, NoPuzzleSetResponse, SetPuzzleResponse, InvalidPuzzleResponse,
        CompositeResponse, UnknownUserSolutionResponse, IgnoredEventCommand, IgnoredEventResponse,
        InvalidCommandResponse, HelpResponse, NonMatchingWordResponse,
-       SetReminderCommand, GetRemindersCommand, SetReminderResponse, GetRemindersResponse,
-       ReminderNotificationResponse, ReminderList, AbstractReminderCommand
+       SetUnsolutionCommand, GetUnsolutionsCommand, SetUnsolutionResponse, GetUnsolutionsResponse,
+       UnsolutionNotificationResponse, UnsolutionList, AbstractUnsolutionCommand
 
 #
 # Helper types
@@ -21,14 +21,14 @@ export Puzzle, Word,
 @newimmutable Word <: UTF8String
 @stringinterface Word
 
-typealias ReminderList Vector{UTF8String}
+typealias UnsolutionList Vector{UTF8String}
 
-type ReminderEntry
+type UnsolutionEntry
     channel::ChannelId
-    texts::ReminderList
+    texts::UnsolutionList
 
-    ReminderEntry(channel::ChannelId) = new(channel, [])
-    ReminderEntry(channel::ChannelId, texts::ReminderList) = new(channel, texts)
+    UnsolutionEntry(channel::ChannelId) = new(channel, [])
+    UnsolutionEntry(channel::ChannelId, texts::UnsolutionList) = new(channel, texts)
 end
 
 #
@@ -72,14 +72,14 @@ immutable InvalidCommand <: AbstractCommand
     reason::Symbol
 end
 
-abstract AbstractReminderCommand <: AbstractCommand
-immutable SetReminderCommand <: AbstractReminderCommand
+abstract AbstractUnsolutionCommand <: AbstractCommand
+immutable SetUnsolutionCommand <: AbstractUnsolutionCommand
     channel::ChannelId
     user::UserId
     text::UTF8String
 end
 
-immutable GetRemindersCommand <: AbstractReminderCommand
+immutable GetUnsolutionsCommand <: AbstractUnsolutionCommand
     channel::ChannelId
     user::UserId
 end
@@ -153,18 +153,18 @@ immutable NonMatchingWordResponse <: AbstractResponse
     too_few::UTF8String
 end
 
-immutable SetReminderResponse <: AbstractResponse
+immutable SetUnsolutionResponse <: AbstractResponse
     channel::ChannelId
     text::UTF8String
 end
 
-immutable GetRemindersResponse <: AbstractResponse
+immutable GetUnsolutionsResponse <: AbstractResponse
     channel::ChannelId
-    texts::ReminderList
+    texts::UnsolutionList
 end
 
-immutable ReminderNotificationResponse <: AbstractResponse
-    entries::Dict{UserId, ReminderList}
+immutable UnsolutionNotificationResponse <: AbstractResponse
+    entries::Dict{UserId, UnsolutionList}
 end
 
 immutable CompositeResponse <: AbstractResponse

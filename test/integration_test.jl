@@ -93,7 +93,7 @@ facts("Integration") do
         on_error(handler, DeserializationError(utf8("text"), "{}", MessageEvent))
     end
 
-    context("Reminder notifications") do
+    context("Unsolution notifications") do
         members = FakeMemberScroll()
         rtm_client = FakeRTMClient()
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI"), utf8("DEFABCJKL")]))
@@ -117,34 +117,34 @@ facts("Integration") do
         @fact contains(msg.text, utf8("Dagens nia är satt")) --> true
         @fact contains(msg.text, utf8("ABC DEF GHI")) --> true
 
-        # Set three reminder for two users, and expect response:
+        # Set three unsolution for two users, and expect response:
         # U0 => FOO
         # U1 => BAR, baz
         on_event(handler,
-            MessageEvent("!reminder FOO", ChannelId("D0"), UserId("U0"), EventTimestamp("123")))
+            MessageEvent("!unsolution FOO", ChannelId("D0"), UserId("U0"), EventTimestamp("123")))
 
         msg = take_message!(rtm_client)
         @fact msg.channel --> ChannelId("D0")
         @fact contains(msg.text, utf8("FOO")) --> true
 
         on_event(handler,
-            MessageEvent("!reminder BAR", ChannelId("D1"), UserId("U1"), EventTimestamp("123")))
+            MessageEvent("!unsolution BAR", ChannelId("D1"), UserId("U1"), EventTimestamp("123")))
 
         msg = take_message!(rtm_client)
         @fact msg.channel --> ChannelId("D1")
         @fact contains(msg.text, utf8("BAR")) --> true
 
         on_event(handler,
-            MessageEvent("!reminder baz", ChannelId("D1"), UserId("U1"), EventTimestamp("123")))
+            MessageEvent("!unsolution baz", ChannelId("D1"), UserId("U1"), EventTimestamp("123")))
 
         msg = take_message!(rtm_client)
         @fact msg.channel --> ChannelId("D1")
         @fact contains(msg.text, utf8("baz")) --> true
 
-        # Get reminders for user U1, and set command on main channel, and receive command in
+        # Get unsolutions for user U1, and set command on main channel, and receive command in
         # the private channel D1.
         on_event(handler,
-            MessageEvent("!reminders", ChannelId("C0"), UserId("U1"), EventTimestamp("123")))
+            MessageEvent("!unsolutions", ChannelId("C0"), UserId("U1"), EventTimestamp("123")))
 
         msg = take_message!(rtm_client)
         @fact msg.channel --> ChannelId("D1")
