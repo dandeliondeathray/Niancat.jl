@@ -69,4 +69,10 @@ facts("Word dictionary") do
             @fact no_of_solutions(words, Puzzle(puzzle)) --> n
         end
     end
+
+    context("Find solutions") do
+        @fact find_solutions(words, Puzzle("datorspel")) --> [Word("SPELDATOR"), Word("DATORSPEL")]
+        @fact find_solutions(words, Puzzle("AGALLTJUT")) --> [Word("GALLTJUTA")]
+        @fact find_solutions(words, Puzzle("NOSUCHWOR")) --> []
+    end
 end
