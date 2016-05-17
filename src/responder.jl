@@ -125,9 +125,9 @@ function respond(r::Responder, response::InvalidCommandResponse)
 end
 
 function respond(r::Responder, response::UnsolutionNotificationResponse)
-    header = [utf8("*Olösningar*\n")]
+    header = [utf8("*Olösningar*")]
     unsolutions = [
-        utf8("<@$(user)>\n> $(join(unsolutions, quote_delim))")
+        utf8("\n<@$(user)>\n> $(join(unsolutions, quote_delim))")
         for (user, unsolutions) in response.entries
     ]
 
