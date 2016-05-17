@@ -9,7 +9,8 @@ export Puzzle, Word,
        CompositeResponse, UnknownUserSolutionResponse, IgnoredEventCommand, IgnoredEventResponse,
        InvalidCommandResponse, HelpResponse, NonMatchingWordResponse,
        SetUnsolutionCommand, GetUnsolutionsCommand, SetUnsolutionResponse, GetUnsolutionsResponse,
-       UnsolutionNotificationResponse, UnsolutionList, AbstractUnsolutionCommand
+       UnsolutionNotificationResponse, UnsolutionList, AbstractUnsolutionCommand,
+       PreviousSolutionsResponse
 
 #
 # Helper types
@@ -165,6 +166,10 @@ end
 
 immutable UnsolutionNotificationResponse <: AbstractResponse
     entries::Dict{UserId, UnsolutionList}
+end
+
+immutable PreviousSolutionsResponse <: AbstractResponse
+    solvers::Dict{Word, Vector{UserId}}
 end
 
 immutable CompositeResponse <: AbstractResponse

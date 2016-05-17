@@ -1,7 +1,7 @@
 import Base.==
 
 import Niancat: is_solution, no_of_solutions, handle, non_match, unsolution, unsolution_notification,
-                UnsolutionList
+                UnsolutionList, find_solutions
 
 #
 # Test data
@@ -62,11 +62,14 @@ fake_members = FakeMemberScroll()
 immutable FakeWordDictionary <: AbstractWordDictionary
     is_solution_::Bool
     no_of_solutions_::Int
+    solutions::Vector{Word}
+
+    FakeWordDictionary(i::Bool, n::Int; solutions::Vector{Word}=Vector{Word}()) = new(i, n, solutions)
 end
 
 is_solution(f::FakeWordDictionary, w::Word) = f.is_solution_
 no_of_solutions(f::FakeWordDictionary, w::Puzzle) = f.no_of_solutions_
-
+find_solutions(f::FakeWordDictionary, p::Puzzle) = f.solutions
 
 type FakeUnsolutions <: AbstractUnsolutions
     response::Nullable{AbstractResponse}
@@ -139,7 +142,7 @@ facts("Niancat logic") do
         get_command = GetPuzzleCommand(channel_id0, user_id0)
         set_command = SetPuzzleCommand(channel_id0, user_id0, puzzle0)
         @fact handle(logic, set_command) --> InvalidPuzzleResponse(channel_id0, puzzle0)
-        @fact handle(logic, get_command) --> NoPuzzleSetResponse(channel_id0)
+        @fact handle(logic, get_command) --> GetPuzzleResponse(channel_id0, puzzle1, 1)
     end
 
     context("Set puzzle, multiple solutions") do
@@ -262,16 +265,16 @@ facts("Niancat logic") do
         @fact handle(logic, FakeUnsolutionCommand()) --> FakeUnsolutionResponse()
     end
 
-    context("Unsolution notification is done on next set") do
+    context("Unsolution notification is done on next set, with no previous puzzle") do
         words = FakeWordDictionary(true, 1)
 
         notification_response = UnsolutionNotificationResponse(Dict{UserId, UnsolutionList}(
             UserId("U0") => [utf8("Hello")]))
 
+        # No previous puzzle means that Logic will not respond with any previous solutions.
         logic = Logic(Nullable{Puzzle}(), words, fake_members,
                       FakeUnsolutions(notification_response), 1)
         set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
-
 
         expected = CompositeResponse(
             SetPuzzleResponse(channel_id0, puzzle0, 1),
@@ -279,6 +282,31 @@ facts("Niancat logic") do
 
         @fact handle(logic, set_command) --> expected
     end
+
+   context("Unsolution notification is done on next set, with previous solutions") do
+        words = FakeWordDictionary(true, 2; solutions=[Word("FOO"), Word("BAR")])
+
+        notification_response = UnsolutionNotificationResponse(Dict{UserId, UnsolutionList}(
+            UserId("U0") => [utf8("Hello")]))
+
+        logic = Logic(Nullable{Puzzle}(Puzzle("QUX")), words, fake_members,
+                      FakeUnsolutions(notification_response), 2)
+        logic.solved[Word("FOO")] = [UserId("U0"), UserId("U1")]
+
+        expected_solutions = PreviousSolutionsResponse(Dict{Word, Vector{UserId}}(
+            Word("FOO") => [UserId("U0"), UserId("U1")],
+            Word("BAR") => Vector{UserId}()))
+
+        set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
+
+        expected = CompositeResponse(
+            SetPuzzleResponse(channel_id0, puzzle0, 2),
+            notification_response,
+            expected_solutions)
+
+        @fact handle(logic, set_command) --> expected
+    end
+
 
     context("Unsolution notification is not done on invalid set") do
         words = FakeWordDictionary(true, 0)
@@ -289,5 +317,37 @@ facts("Niancat logic") do
         set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
 
         handle(logic, set_command)
+    end
+
+    context("Store solutions and user that solved it") do
+        words = FakeWordDictionary(true, 2; solutions=[Word("IABCDEFGH"), Word("ABCDEFGHI")])
+
+        logic = Logic(Nullable{Puzzle}(Puzzle("DEFGHIABC")), words, fake_members,
+                      FakeUnsolutions(), 2)
+
+        handle(logic, CheckSolutionCommand(ChannelId("D0"), UserId("U0"), Word("ABCDEFGHI")))
+        handle(logic, CheckSolutionCommand(ChannelId("D1"), UserId("U1"), Word("ABCDEFGHI")))
+
+        @fact logic.solved[Word("ABCDEFGHI")] --> [UserId("U0"), UserId("U1")]
+        @fact haskey(logic.solved, Word("IABCDEFGH")) --> false
+    end
+
+    context("Clear solutions on next set") do
+        words = FakeWordDictionary(true, 2; solutions=[Word("IABCDEFGH"), Word("ABCDEFGHI")])
+
+
+        notification_response = UnsolutionNotificationResponse(Dict{UserId, UnsolutionList}(
+            UserId("U0") => [utf8("Hello")]))
+        logic = Logic(Nullable{Puzzle}(Puzzle("DEFGHIABC")), words, fake_members,
+                      FakeUnsolutions(notification_response), 2)
+
+        handle(logic, CheckSolutionCommand(ChannelId("D0"), UserId("U0"), Word("ABCDEFGHI")))
+        handle(logic, CheckSolutionCommand(ChannelId("D1"), UserId("U1"), Word("ABCDEFGHI")))
+
+        set_command = SetPuzzleCommand(channel_id0, user_id0, Puzzle("ABCDEFGHI"))
+        set_response = handle(logic, set_command)
+        @fact isa(set_response, InvalidPuzzleResponse) --> false
+
+        @fact logic.solved --> isempty
     end
 end

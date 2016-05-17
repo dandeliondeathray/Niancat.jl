@@ -142,3 +142,22 @@ function respond(r::Responder, response::GetUnsolutionsResponse)
 
     send(r, response.channel, text)
 end
+
+function respond(r::Responder, response::PreviousSolutionsResponse)
+    header = [utf8("*Gårdagens lösningar:*")]
+    if length(response.solvers) == 1
+        header = [utf8("*Gårdagens lösning:*")]
+    end
+    user_delims = ", "
+
+    slack_solvers = [
+        (word, ["<@$(u)>" for u in solvers])
+        for (word, solvers) in response.solvers
+    ]
+
+    solutions = [
+        utf8("\n*$(word):* $(join(solvers, user_delims))")
+        for (word, solvers) in slack_solvers
+    ]
+    send(r, r.main_channel, join([header; solutions]))
+end

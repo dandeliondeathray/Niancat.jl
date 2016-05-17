@@ -47,14 +47,15 @@ type Logic <: AbstractLogic
     members::AbstractMembers
     unsolutions::AbstractUnsolutions
     solutions::UInt
+    solved::Dict{Word, Vector{UserId}}
 
     Logic(words::AbstractWordDictionary, m::AbstractMembers) =
-        new(Nullable{Puzzle}(), words, m, Unsolutions(), 0)
+        new(Nullable{Puzzle}(), words, m, Unsolutions(), 0, Dict{Word, Vector{UserId}}())
     Logic(p::Nullable{Puzzle},
           words::AbstractWordDictionary,
           m::AbstractMembers,
           r::AbstractUnsolutions,
-          s::Int) = new(Nullable{Puzzle}(p), words, m, r, s)
+          s::Int) = new(Nullable{Puzzle}(p), words, m, r, s, Dict{Word, Vector{UserId}}())
 end
 
 function handle(logic::Logic, command::GetPuzzleCommand)
@@ -66,21 +67,38 @@ function handle(logic::Logic, command::GetPuzzleCommand)
 end
 
 function handle(logic::Logic, command::SetPuzzleCommand)
-    logic.solutions = no_of_solutions(logic.words, command.puzzle)
+    new_no_of_solutions = no_of_solutions(logic.words, command.puzzle)
 
-    if logic.solutions == 0
-        logic.puzzle = Nullable{Puzzle}()
+    if new_no_of_solutions == 0
         return InvalidPuzzleResponse(command.channel, command.puzzle)
+    end
+    logic.solutions = new_no_of_solutions
+
+
+    set_puzzle_response = SetPuzzleResponse(command.channel, command.puzzle, logic.solutions)
+    responses = Vector{AbstractResponse}([set_puzzle_response])
+
+    notification_response = unsolution_notification(logic.unsolutions)
+    if !isempty(notification_response.entries)
+        push!(responses, notification_response)
+    end
+
+    if !isnull(logic.puzzle)
+        all_solutions = find_solutions(logic.words, get(logic.puzzle))
+        solvers = Dict{Word, Vector{UserId}}([
+            (w, get(logic.solved, w, Vector{UserId}()))
+            for w in all_solutions
+        ])
+        push!(responses, PreviousSolutionsResponse(solvers))
     end
 
     logic.puzzle = command.puzzle
+    empty!(logic.solved)
 
-    set_puzzle_response = SetPuzzleResponse(command.channel, command.puzzle, logic.solutions)
-    notification_response = unsolution_notification(logic.unsolutions)
-    if isempty(notification_response.entries)
-        return set_puzzle_response
+    if length(responses) == 1
+        return responses[1]
     else
-        return CompositeResponse(set_puzzle_response, notification_response)
+        return CompositeResponse(responses...)
     end
 end
 
@@ -100,6 +118,12 @@ function handle(logic::Logic, command::CheckSolutionCommand)
     end
 
     if is_solution(logic.words, command.word)
+        # Store solution locally so we can show every user that solved it.
+        normalized_word = normalize(command.word)
+        solvers = get(logic.solved, normalized_word, Vector{UserId}())
+        push!(solvers, command.user)
+        logic.solved[normalized_word] = solvers
+
         maybe_name = find_name(logic.members, command.user)
         if isnull(maybe_name)
             return CompositeResponse(
@@ -108,7 +132,6 @@ function handle(logic::Logic, command::CheckSolutionCommand)
         end
         # Note that `name` is a SlackName, not a UTF8String.
         name = get(maybe_name)
-        normalized_word = normalize(command.word)
         hash = solution_hash(utf8(normalized_word), name.v)
         return CompositeResponse(
             CorrectSolutionResponse(command.channel, normalized_word),

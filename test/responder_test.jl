@@ -135,7 +135,21 @@ responder_tests = [
         UnsolutionNotificationResponse(Dict{UserId, UnsolutionList}(
             UserId("U0") => [utf8("FOO")],
             UserId("U1") => [utf8("BAR"), utf8("BAZ")])),
-        [TestEvent(main_channel_id, "<@U0>", "FOO", "<@U1>", "BAR", "BAZ")])
+        [TestEvent(main_channel_id, "<@U0>", "FOO", "<@U1>", "BAR", "BAZ")]),
+
+    ResponderTest(
+        "Previous solutions response",
+        PreviousSolutionsResponse(Dict{Word, Vector{UserId}}(
+            Word("FOO") => [UserId("U0"), UserId("U1")],
+            Word("BAR") => [])),
+        [TestEvent(main_channel_id, "<@U0>", "FOO", "<@U1>", "BAR", "Gårdagens lösningar")]),
+
+    ResponderTest(
+        "Previous solutions response, only one solution",
+        PreviousSolutionsResponse(Dict{Word, Vector{UserId}}(
+            Word("FOO") => [UserId("U0"), UserId("U1")])),
+        [TestEvent(main_channel_id, "<@U0>", "FOO", "<@U1>", "Gårdagens lösning";
+            has_not=["lösningar"])])
 ]
 
 type FakeRTMClient <: AbstractRTMClient
