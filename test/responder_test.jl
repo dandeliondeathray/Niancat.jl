@@ -1,6 +1,6 @@
 main_channel_id = ChannelId("C0123")
 
-import DandelionSlack: OutgoingEvent, OutgoingMessageEvent, AbstractRTMClient, send_event
+import DandelionSlack: OutgoingEvent, OutgoingMessageEvent, send_event
 import Niancat: prettify
 
 type TestEvent
@@ -151,21 +151,6 @@ responder_tests = [
         [TestEvent(main_channel_id, "<@U0>", "FOO", "<@U1>", "Gårdagens lösning";
             has_not=["lösningar"])])
 ]
-
-type FakeRTMClient <: AbstractRTMClient
-    messages::Vector{OutgoingEvent}
-
-    FakeRTMClient() = new([])
-end
-
-send_event(c::FakeRTMClient, event::OutgoingEvent) = push!(c.messages, event)
-
-function take_message!(c::FakeRTMClient)
-    @fact c.messages --> not(isempty)
-    ev = shift!(c.messages)
-    @fact typeof(ev) --> OutgoingMessageEvent
-    ev
-end
 
 facts("Responder") do
     context("Prettify solutions") do

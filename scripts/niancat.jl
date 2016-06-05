@@ -20,7 +20,7 @@ args = docopt(doc, version=v"0.1.0")
 function find_channel(token::Token, channel_name::UTF8String)
     channels_list = ChannelsList(token, Nullable{Int64}())
     try
-        status, response = makerequest(channels_list, requests)
+        status, response = makerequest(channels_list, real_requests)
         channel_index = findfirst(c -> c.name == channel_name, response.channels)
         if channel_index == 0
             println("No channel named $(channel_name) in team $(team)")
@@ -46,19 +46,13 @@ end
 
 channel_id = get(channel).id
 
-status, response = makerequest(RtmStart(token, Nullable(), Nullable(), Nullable()), requests)
-if !status.ok
-    println("Could not start RTM: $(status.error)")
-    exit(1)
-end
-
 words = parse_dictionary(open(dictionary_file))
-
 members = Members()
-handler = NiancatHandler(members, words, channel_id, token)
-client = rtm_connect(Requests.URI(response.url), handler)
-on_create(handler, client)
 
-while true
-    sleep(10)
-end
+client = RTMClient(token)
+handler = NiancatHandler(client, members, words, channel_id, token)
+
+rtm_connect(client)
+
+stop_channel = Channel{Any}(32)
+take!(stop_channel)
