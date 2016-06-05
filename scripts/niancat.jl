@@ -46,19 +46,14 @@ end
 
 channel_id = get(channel).id
 
-status, response = makerequest(RtmStart(token, Nullable(), Nullable(), Nullable()), requests)
-if !status.ok
-    println("Could not start RTM: $(status.error)")
-    exit(1)
-end
-
 words = parse_dictionary(open(dictionary_file))
-
 members = Members()
-handler = NiancatHandler(members, words, channel_id, token)
-client = rtm_connect(Requests.URI(response.url), handler)
-on_create(handler, client)
 
-while true
-    sleep(10)
-end
+client = RTMClient(token)
+handler = NiancatHandler(members, words, channel_id, token)
+attach(client, handler)
+
+rtm_connect(client)
+
+stop_channel = Channel{Any}(32)
+take!(stop_channel)

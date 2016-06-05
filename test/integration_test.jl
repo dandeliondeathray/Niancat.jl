@@ -5,10 +5,9 @@ facts("Integration") do
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
         token = Token("sometoken")
 
-        handler = NiancatHandler(members, words, ChannelId("C0"), token)
+        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"), token)
 
-        # Calling on_create lets the handler get a reference to RTMClient
-        on_create(handler, rtm_client)
+        @fact rtm_client --> is_handler_set
 
         # Add fake users to the member list
         add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
@@ -59,9 +58,9 @@ facts("Integration") do
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
         token = Token("sometoken")
 
-        handler = NiancatHandler(members, words, ChannelId("C0"), token)
+        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"), token)
 
-        on_create(handler, rtm_client)
+        @fact rtm_client --> is_handler_set
 
         # Add fake users to the member list
         add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
@@ -83,9 +82,10 @@ facts("Integration") do
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
         token = Token("sometoken")
 
-        handler = NiancatHandler(members, words, ChannelId("C0"), token)
+        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"), token)
 
-        on_create(handler, rtm_client)
+        @fact rtm_client --> is_handler_set
+
         add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))
         on_event(handler, HelloEvent())
 
@@ -99,10 +99,9 @@ facts("Integration") do
         words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI"), utf8("DEFABCJKL")]))
         token = Token("sometoken")
 
-        handler = NiancatHandler(members, words, ChannelId("C0"), token)
+        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"), token)
 
-        # Calling on_create lets the handler get a reference to RTMClient
-        on_create(handler, rtm_client)
+        @fact rtm_client --> is_handler_set
 
         # Add fake users to the member list
         add(members, u("U0", "User 0"), u("U1", "User 1"), u("U2", "User 2"))

@@ -1,5 +1,5 @@
 import Niancat: find_name, retrieve_user_list, add, UnsolutionEntry
-import DandelionSlack: User
+import DandelionSlack: User, AbstractRTMClient, OutgoingEvent, send_event, attach
 import Base: ==
 
 type FakeMemberScroll <: AbstractMembers
@@ -27,3 +27,23 @@ add(s::FakeMemberScroll, us...) = for u in us add(s, u) end
 
 
 ==(a::UnsolutionEntry, b::UnsolutionEntry) = a.channel == b.channel && a.texts == b.texts
+
+
+type FakeRTMClient <: AbstractRTMClient
+    messages::Vector{OutgoingEvent}
+    handler::Nullable{RTMHandler}
+
+    FakeRTMClient() = new([], Nullable{RTMHandler}())
+end
+
+send_event(c::FakeRTMClient, event::OutgoingEvent) = push!(c.messages, event)
+attach(c::FakeRTMClient, handler::RTMHandler) = c.handler = Nullable{RTMHandler}(handler)
+
+function take_message!(c::FakeRTMClient)
+    @fact c.messages --> not(isempty)
+    ev = shift!(c.messages)
+    @fact typeof(ev) --> OutgoingMessageEvent
+    ev
+end
+
+is_handler_set(c::FakeRTMClient) = !isnull(c.handler)

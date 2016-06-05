@@ -27,8 +27,4 @@ facts("Bot initialization") do
             @fact is_solution(words, Word(w)) --> false
         end
     end
-
-    context("Initialize the bot") do
-
-    end
 end
