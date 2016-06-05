@@ -7,7 +7,7 @@ immutable Members <: AbstractMembers
     channels::Dict{ChannelId, SlackChannel}
     web_api_call::Function
 
-    Members(;web_api_call=x -> makerequest(x, requests)) =
+    Members(;web_api_call=x -> makerequest(x, real_requests)) =
         new(Dict{UserId, User}(), Dict{ChannelId, SlackChannel}(), web_api_call)
 end
 
