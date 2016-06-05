@@ -20,7 +20,7 @@ args = docopt(doc, version=v"0.1.0")
 function find_channel(token::Token, channel_name::UTF8String)
     channels_list = ChannelsList(token, Nullable{Int64}())
     try
-        status, response = makerequest(channels_list, requests)
+        status, response = makerequest(channels_list, real_requests)
         channel_index = findfirst(c -> c.name == channel_name, response.channels)
         if channel_index == 0
             println("No channel named $(channel_name) in team $(team)")
@@ -50,8 +50,7 @@ words = parse_dictionary(open(dictionary_file))
 members = Members()
 
 client = RTMClient(token)
-handler = NiancatHandler(members, words, channel_id, token)
-attach(client, handler)
+handler = NiancatHandler(client, members, words, channel_id, token)
 
 rtm_connect(client)
 

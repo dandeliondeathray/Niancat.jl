@@ -40,6 +40,8 @@ type NiancatHandler <: RTMHandler
         handler
     end
 end
+show(io::IO, handler::NiancatHandler) =
+    show(io, "NiancatHandler($(handler.token), $(handler.main_channel_id))")
 
 function on_event(h::NiancatHandler, event::MessageEvent)
     command = parse_command(event)
