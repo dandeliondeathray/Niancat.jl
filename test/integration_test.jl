@@ -93,6 +93,20 @@ facts("Integration") do
         on_error(handler, DeserializationError(utf8("text"), "{}", MessageEvent))
     end
 
+    context("A user joins") do
+        members = FakeMemberScroll()
+        rtm_client = FakeRTMClient()
+        words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
+        token = Token("sometoken")
+
+        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"), token)
+
+        add(members, u("U0", "User 0"))
+        on_event(handler, TeamJoinEvent(u("U1", "User 1")))
+
+        @fact find_name(members, UserId("U1")) --> Nullable{SlackName}(SlackName("User 1"))
+    end
+
     context("Unsolution notifications") do
         members = FakeMemberScroll()
         rtm_client = FakeRTMClient()

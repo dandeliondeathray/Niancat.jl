@@ -54,6 +54,8 @@ function on_event(h::NiancatHandler, ::HelloEvent)
     retrieve_user_list(h.members, h.token)
 end
 
+on_event(h::NiancatHandler, t::TeamJoinEvent) = add(h.members, t.user)
+
 # Catch all other events we don't care about.
 on_error(h::NiancatHandler, e::EventError) = println("on_error: $e")
 on_reply(h::NiancatHandler, id::Int, event::Event) = nothing
