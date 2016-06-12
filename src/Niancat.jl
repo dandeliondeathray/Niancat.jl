@@ -26,6 +26,7 @@ type NiancatHandler <: RTMHandler
     responder::AbstractResponder
     main_channel_id::ChannelId
     token::Token
+    client::AbstractRTMClient
 
     function NiancatHandler(
         client::AbstractRTMClient,
@@ -35,7 +36,7 @@ type NiancatHandler <: RTMHandler
         token::Token)
 
         handler = new(members, Logic(words, members), Responder(client, main_channel_id),
-                      main_channel_id, token)
+                      main_channel_id, token, client)
         attach(client, handler)
         handler
     end
@@ -55,6 +56,7 @@ function on_event(h::NiancatHandler, ::HelloEvent)
 end
 
 on_event(h::NiancatHandler, t::TeamJoinEvent) = add(h.members, t.user)
+on_event(h::NiancatHandler, ::TeamMigrationStarted) = close(h.client)
 
 # Catch all other events we don't care about.
 on_error(h::NiancatHandler, e::EventError) = println("on_error: $e")

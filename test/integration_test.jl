@@ -107,6 +107,19 @@ facts("Integration") do
         @fact find_name(members, UserId("U1")) --> Nullable{SlackName}(SlackName("User 1"))
     end
 
+    context("Close connection on TeamMigrationStarted") do
+        members = FakeMemberScroll()
+        rtm_client = FakeRTMClient()
+        words = WordDictionary(Set{UTF8String}([utf8("DEFABCGHI")]))
+        token = Token("sometoken")
+
+        handler = NiancatHandler(rtm_client, members, words, ChannelId("C0"), token)
+
+        @fact rtm_client.close_called --> 0
+        on_event(handler, TeamMigrationStarted())
+        @fact rtm_client.close_called --> 1
+    end
+
     context("Unsolution notifications") do
         members = FakeMemberScroll()
         rtm_client = FakeRTMClient()
