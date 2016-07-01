@@ -152,7 +152,7 @@ function respond(r::Responder, response::PreviousSolutionsResponse)
 
     slack_solvers = [
         (word, ["<@$(u)>" for u in solvers])
-        for (word, solvers) in response.solvers
+        for (word, solvers) in unique(response.solvers)
     ]
 
     solutions = [
