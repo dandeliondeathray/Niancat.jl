@@ -42,7 +42,7 @@ Kommandon:
     !unsolutions        Visa alla mina olösning. Svar, om det finns, visas i en privat kanal.
     !helpnian           Visa denna hjälptext.
 
-Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till tiancat.
+Alla dessa kommandon kan man köra både i kanalen och i privat-meddelande till niancat.
 """
 
 quote_delim = "\n> "
